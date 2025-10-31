@@ -1,5 +1,5 @@
 import { addColors, createLogger, format, transports } from "winston"
-import { env } from "./env.config"
+const env = { NODE_ENV: process.env.NODE_ENV || "development" }
 //colors
 const colors = {
   info: "blue",
