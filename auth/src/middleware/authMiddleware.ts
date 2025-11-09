@@ -6,10 +6,17 @@ declare global {
   namespace Express {
     interface Request {
       user?: {
-        userId: string
+        userId: string;
+        role:"USER" | "ADMIN";
       }
     }
   }
+}
+export interface JwtPayloadCustom {
+  userId: string;
+  role: "USER" | "ADMIN";
+  iat?: number;
+  exp?: number;
 }
 
 export const verifyAccessToken = (
@@ -28,9 +35,9 @@ export const verifyAccessToken = (
     const decoded = jwt.verify(
       token,
       process.env.ACCESS_TOKEN_SECRET!,
-    ) as JwtPayload
+    ) as JwtPayloadCustom
 
-    req.user = { userId: decoded.userId }
+    req.user = { userId: decoded.userId,role:decoded.role }
     next()
   } catch (err) {
     return res.status(401).json({ message: "Invalid or expired access token" })

@@ -73,7 +73,7 @@ export const verifyOtpController = async (req: Request, res: Response) => {
         message: "user not found",
       })
 
-    const { refreshToken, accessToken } = generateTokens(user.id)
+    const { refreshToken, accessToken } = generateTokens(user.id,user.role)
     await prisma.user.update({
       where: { id: user.id },
       data: { refreshToken: refreshToken },
@@ -104,6 +104,7 @@ export const refreshTokenController = async (req: Request, res: Response) => {
   try {
     console.log("1st log")
     const userId = req.user?.userId
+    const role = req.user?.role;
     if (!userId)
       return res
         .status(401)
@@ -138,8 +139,8 @@ export const refreshTokenController = async (req: Request, res: Response) => {
         message: "Token reuse detected",
       })
     }
-
-    const { refreshToken, accessToken } = generateTokens(userId)
+    const userRole = role || user.role
+    const { refreshToken, accessToken } = generateTokens(userId,userRole)
 
     await prisma.user.update({
       where: { id: userId },

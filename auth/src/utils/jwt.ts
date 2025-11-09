@@ -2,10 +2,11 @@ import jwt, { Secret } from "jsonwebtoken"
 
 interface JwtPayload {
   userId: string
+  role:string
 }
-export const generateTokens = (userId: string) => {
+export const generateTokens = (userId: string,role:string) => {
   const accessToken = jwt.sign(
-    { userId } as JwtPayload,
+    { userId,role} as JwtPayload,
     process.env.ACCESS_TOKEN_SECRET as Secret,
     {
       expiresIn: "15m",
