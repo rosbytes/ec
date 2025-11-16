@@ -4,6 +4,7 @@ import {
   deleteProduct,
   getAllProduct,
   getProductBySlug,
+  getProductDetails,
   updateProduct,
 } from "../controller/product.controller";
 import { validate } from "../middleware/validate";
@@ -18,13 +19,14 @@ const router = express.Router();
 
 const upload = createMulterUpload(10);
 
+
+router.get("/internal/products/:productId/:variantId",getProductDetails)
 // admin
 router.post(
   "/",
   verifyAdmin,
   upload.single("image"),
   validate(CreateProductSchema),
-
   createProduct
 );
 router.put(
@@ -32,7 +34,6 @@ router.put(
   verifyAdmin,
   upload.single("image"),
   validate(ProductSchema),
-  upload.single("image"),
   updateProduct
 );
 router.delete("/:id", verifyAdmin, deleteProduct);

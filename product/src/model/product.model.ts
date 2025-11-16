@@ -1,7 +1,8 @@
-import { Schema, model, Document } from "mongoose";
+import { Schema, model, Document,Types } from "mongoose";
 import slugify from "slugify";
 
 interface IVariant {
+  _id: Types.ObjectId;
   label: string; // 500gm or 1kg
   price: number;
   stock: number;
@@ -28,15 +29,13 @@ export interface IProduct extends Document {
   updatedAt: Date;
 }
 
-const VariantSchema = new Schema<IVariant>(
-  {
-    label: { type: String, required: true, trim: true },
-    price: { type: Number, required: true },
-    stock: { type: Number, default: 0 },
-    isAvailable: { type: Boolean, default: true },
-  },
-  { _id: false }
-);
+const VariantSchema = new Schema<IVariant>({
+  _id: { type: Schema.Types.ObjectId, auto: true },
+  label: { type: String, required: true, trim: true },
+  price: { type: Number, required: true },
+  stock: { type: Number, default: 0 },
+  isAvailable: { type: Boolean, default: true },
+});
 
 const ImageSchema = new Schema<IImage>(
   {

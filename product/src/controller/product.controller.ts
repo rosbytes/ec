@@ -7,6 +7,37 @@ import {
   deleteMediaFromCloudinary,
 } from "../utils/cloudinary";
 
+export const getProductDetails = async (req: Request, res: Response) => {
+  try {
+    const { productId, variantId } = req.params;
+    const product = await Product.findById(productId);
+    if (!product) {
+      return res.status(404).json({ message: "Product not found" });
+    }
+
+    const variant = product.variants.find((v) => v._id.toString() === variantId);
+    if (!variant) {
+      return res.status(404).json({ message: "Variant not found" });
+    }
+
+    return res.json({
+      productId:product._id,
+      variantId:variant._id,
+      name:product.name,
+      localName:product.localName,
+      price:variant.price,
+       stock: variant.stock,
+      isAvailable: variant.isAvailable,
+      image:product.image?.[1]?.url,
+      isActive:product.isActive
+
+    })
+  } catch (err: any) {
+    logger.error(`getProductDetails | controller | ${err.message}`);
+    res.status(500).json({ success: false, message: err.message });
+  }
+};
+
 export const createProduct = async (req: Request, res: Response) => {
   try {
     if (!req.file) {
