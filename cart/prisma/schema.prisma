@@ -26,7 +26,16 @@ model CartItem{
   id String @id @default(cuid())
   cartId String
   productId String
+  variantId String
+
+  name String
+  localName String
+  image String?
+  label String
   price Int
   quantity Int
+
   cart Cart @relation(fields: [cartId],references: [id])
+
+  @@unique([cartId,productId,variantId])
 }
