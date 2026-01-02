@@ -1,14 +1,21 @@
 import logger from "@configs/logger.config"
 import { Request, Response, NextFunction } from "express"
-import { ZodSchema } from "zod"
+import { ZodSchema, ZodTypeAny } from "zod"
+import { extend } from "zod/v4/core/util.cjs"
 
 export const validate =
-  (schema: ZodSchema) => (req: Request, res: Response, next: NextFunction) => {
+  <T extends ZodTypeAny>(schema: T) =>
+  (req: Request, res: Response, next: NextFunction) => {
     try {
       console.log("received schema")
-      schema.parse({
+      const parsed = schema.parse({
         body: req.body,
-      })
+        params: req.params,
+        query: req.query,
+      }) as any
+      if (parsed.body) req.body = parsed.body
+      if (parsed.params) req.params = parsed.params
+      if (parsed.query) req.query = parsed.query
       next()
     } catch (error: any) {
       logger.error(`${JSON.stringify(error)}`)

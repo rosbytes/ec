@@ -1,4 +1,4 @@
-import { prisma } from "../utils/prismaClient"
+import { prisma } from "../utils/prisma"
 import { redisClient } from "../utils/redisClient"
 import { sendOtp } from "../utils/twilio"
 import { generateTokens, verifyRefreshToken } from "../utils/jwt"
@@ -102,7 +102,7 @@ export const verifyOtpController = async (req: Request, res: Response) => {
 
 export const refreshTokenController = async (req: Request, res: Response) => {
   try {
-    console.log("1st log")
+    // console.log("1st log")
     const userId = req.user?.userId
     const role = req.user?.role;
     if (!userId)

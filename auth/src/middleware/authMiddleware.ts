@@ -1,6 +1,6 @@
 import jwt, { JwtPayload } from "jsonwebtoken"
 import { Request, Response, NextFunction } from "express"
-import "express"
+
 
 declare global {
   namespace Express {
@@ -69,7 +69,7 @@ export const verifyRefreshToken = (
         message: "Invalid token payload",
       })
     }
-    req.user = { userId: decoded.userId }
+    req.user = { userId: decoded.userId, role: decoded.role as "USER" | "ADMIN" }
     next()
   } catch (err) {
     return res.status(401).json({ message: "Invalid or expired refresh token" })

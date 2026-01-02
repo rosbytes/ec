@@ -4,6 +4,8 @@ import helmet from "helmet"
 import cors from "cors"
 import cookieParser from "cookie-parser"
 import router from "@routes/auth-routes"
+import profileRoutes from "@routes/profile-routes"
+import addressRoutes from "@routes/address-routes"
 
 const SERVER_PORT = Number(process.env.SERVER_PORT) || 3000
 
@@ -22,6 +24,8 @@ app.use((req: Request, res: Response, next: NextFunction) => {
 })
 
 app.use("/api/auth", router)
+app.use("/api/me/profile",profileRoutes)
+app.use("/api/me/addresses",addressRoutes)
 app.listen(SERVER_PORT, () => {
   logger.info(`Server is started at: ${SERVER_PORT}`)
 })

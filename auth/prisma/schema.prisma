@@ -5,13 +5,13 @@
 // Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
 
 generator client {
-  provider = "prisma-client"
+  provider = "prisma-client-js"
   output   = "../src/generated/prisma"
 }
 
 datasource db {
   provider = "postgresql"
-  url      = env("DATABASE_URL")
+  
 }
 
 model User {
@@ -22,7 +22,23 @@ model User {
   refreshToken  String?
   createdAt     DateTime  @default(now())
   updatedAt     DateTime  @updatedAt 
+  addresses     Address[]
 }
+
+model Address {
+  id     String  @id @default(cuid())
+  userId String
+  label  String 
+  name   String
+  phone  String
+  addressLine String
+  city    String
+  pinCode  String
+  createdAt  DateTime @default(now())
+  user  User  @relation(fields: [userId],references: [id])
+}
+
+
 enum Role {
   USER
   ADMIN
