@@ -3,45 +3,11 @@ import { Product } from "../model/product.model";
 import logger from "../config/logger.config";
 import slugify from "slugify";
 import {
-  uploadMediaToCloudianry,
+  uploadMediaToCloudinary,
   deleteMediaFromCloudinary,
 } from "../utils/cloudinary";
 
-export const getProductDetails = async (req: Request, res: Response) => {
-  try {
-    const { productId, variantId } = req.params;
-    const product = await Product.findById(productId);
-    if (!product) {
-      return res.status(404).json({ message: "Product not found" });
-    }
 
-    const variant = product.variants.find(
-      (v) => v._id.toString() === variantId
-    );
-
-    if (!variant) {
-      return res.status(404).json({ message: "Variant not found" });
-    }
-
-    return res.json({
-      productId: product._id,
-      variantId: variant._id,
-      name: product.name,
-      localName: product.localName,
-      category: product.category, 
-
-      label: variant.label,
-      price: variant.price,
-      stock: variant.stock,
-      isAvailable: variant.isAvailable,
-      image: product.image,
-      isActive: product.isActive,
-    });
-  } catch (err: any) {
-    logger.error(`getProductDetails | controller | ${err.message}`);
-    res.status(500).json({ success: false, message: err.message });
-  }
-};
 
 export const createProduct = async (req: Request, res: Response) => {
   try {
@@ -51,7 +17,7 @@ export const createProduct = async (req: Request, res: Response) => {
         message: "No image provided",
       });
     }
-    const uploadResult = await uploadMediaToCloudianry(req.file);
+    const uploadResult = await uploadMediaToCloudinary(req.file);
 
     const productData = {
       ...req.body,
@@ -99,7 +65,7 @@ export const updateProduct = async (req: Request, res: Response) => {
         await deleteMediaFromCloudinary(img.public_id);
       }
 
-      const uploadResult = await uploadMediaToCloudianry(req.file);
+      const uploadResult = await uploadMediaToCloudinary(req.file);
       req.body.image = [
         {
           public_id: uploadResult.public_id,

@@ -14,7 +14,7 @@ cloudinary.config({
 interface uploadFile {
   buffer: Buffer;
 }
-export const uploadMediaToCloudianry = (
+export const uploadMediaToCloudinary = (
   file: uploadFile
 ): Promise<UploadApiResponse> => {
   return new Promise((resolve, reject) => {

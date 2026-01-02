@@ -4,7 +4,9 @@ import {
   deleteProduct,
   getAllProduct,
   getProductBySlug,
-  getProductDetails,
+  
+ 
+  
   updateProduct,
 } from "../controller/product.controller";
 import { validate } from "../middleware/validate";
@@ -14,13 +16,14 @@ import {
 } from "../validations/product.validations";
 import { verifyAdmin } from "../middleware/authMiddleware";
 import { createMulterUpload } from "../config/multer.config";
+import { getProductDetails } from "../controller/internal.controller";
 
 const router = express.Router();
 
 const upload = createMulterUpload(10);
 
 
-router.get("/internal/products/:productId/:variantId",getProductDetails)
+router.get("/internal/:productId/:variantId",getProductDetails)
 // admin
 router.post(
   "/",
