@@ -5,13 +5,16 @@
 // Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
 
 generator client {
-  provider = "prisma-client"
+  provider = "prisma-client-js"
   output   = "../src/generated/prisma"
 }
 
 datasource db {
   provider = "postgresql"
-  url      = env("DATABASE_URL")
+  // Connection URLs are no longer supported in schema files.
+  // Move database connection configuration to prisma.config.ts and pass
+  // an adapter or accelerateUrl to the PrismaClient as described in:
+  // https://pris.ly/d/config-datasource and https://pris.ly/d/prisma7-client-config
 }
 
 model Cart {

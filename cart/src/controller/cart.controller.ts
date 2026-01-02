@@ -1,7 +1,6 @@
 import type { NextFunction, Request, Response } from "express";
 import { internalGet } from "../utils/helper.js";
-import { prisma } from "../config/prisma.js";
-import { email } from "zod";
+import { prisma } from "../utils/prisma.js";
 
 export const addToCart = async (
   req: Request,
@@ -135,6 +134,10 @@ export const removeCartItem = async (
 ) => {
   try {
     const { itemId } = req.params;
+
+    if (!itemId) {
+      return res.status(400).json({ message: "itemId is required" });
+    }
 
     await prisma.cartItem.delete({ where: { id: itemId } });
 
