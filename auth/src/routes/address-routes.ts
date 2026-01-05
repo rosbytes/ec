@@ -5,7 +5,7 @@ import {
   postAddress,
   deleteAddress,
 } from "@/controller/address-controller"
-import { verifyAccessToken } from "@/middleware/authMiddleware"
+
 import { validate } from "@/middleware/validate"
 import {
   createAddressSchema,
@@ -14,20 +14,22 @@ import {
 import { defaultLimiter } from "@/middleware/rateLimiter"
 const addressRoutes = Router()
 
-addressRoutes.get("/", defaultLimiter, verifyAccessToken, getAddress)
+
+addressRoutes.get("/", defaultLimiter, getAddress)
+
 
 addressRoutes.post(
   "/",
   defaultLimiter,
-  verifyAccessToken,
   validate(createAddressSchema),
   postAddress,
 )
 
+
 addressRoutes.delete(
   "/:id",
   defaultLimiter,
-  verifyAccessToken,
+
   validate(deleteAddressSchema),
   deleteAddress,
 )

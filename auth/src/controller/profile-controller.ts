@@ -1,16 +1,19 @@
 import { Request, Response } from "express"
 import { prisma } from "../utils/prisma"
 
-function getUserById(req: any): string {
-  if (!req.user?.userId) {
-    throw new Error("Unauthorized")
+function getUserId(req: Request): string {
+  const userId = req.headers["x-user-id"] as string;
+  
+  if (!userId) {
+    throw new Error("Unauthorized");
   }
-  return req.user?.userId
+  
+  return userId;
 }
 
 export const getProfileController = async (req: Request, res: Response) => {
   try {
-    const userId = getUserById(req)
+    const userId = getUserId(req)
 
     const user = await prisma.user.findUnique({
       where: { id: userId },
@@ -35,7 +38,7 @@ export const getProfileController = async (req: Request, res: Response) => {
 
 export const updateProfileController = async (req: Request, res: Response) => {
   try {
-    const userId = getUserById(req) // userID
+    const userId = getUserId(req) // userID
 
     const { name, phone } = req.body
 

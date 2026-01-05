@@ -1,20 +1,17 @@
 import express from "express";
 import cors from "cors";
 import dotenv from "dotenv";
-import {} from "./routes/order.routes.js"
+import orderRoutes, {} from "./routes/order.routes.js"
+import { paymentWebhook } from "./controller/order.controller.js";
 
 dotenv.config();
 
 const app = express();
 
 app.post(
-  "/order/webhook/payment",
+  "/order/payment/webhook",
   express.raw({ type: "application/json" }),
-  (req, res, next) => {
-    //raw body to controller
-    (req as any).rawBody = req.body;
-    next();
-  }
+  paymentWebhook
 );
 
 app.use(cors());

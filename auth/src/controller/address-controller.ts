@@ -2,16 +2,19 @@ import { Request, Response } from "express"
 
 import { prisma } from "../utils/prisma"
 
-function getUserById(req: any) {
-  if (!req.user || !req.user.id) {
-    throw new Error("unauthorized")
+function getUserId(req: Request): string {
+  const userId = req.headers["x-user-id"] as string
+
+  if (!userId) {
+    throw new Error("Unauthorized")
   }
-  return req.user.id
+
+  return userId
 }
 
 export const getAddress = async (req: Request, res: Response) => {
   try {
-    const userId = getUserById(req)
+    const userId = getUserId(req)
 
     const addresses = await prisma.address.findMany({
       where: { userId },
@@ -26,7 +29,7 @@ export const getAddress = async (req: Request, res: Response) => {
 
 export const postAddress = async (req: Request, res: Response) => {
   try {
-    const userId = getUserById(req)
+    const userId = getUserId(req)
     const { label, name, phone, addressLine, city, pinCode } = req.body
 
     if (!addressLine || !city || !pinCode) {
@@ -66,7 +69,7 @@ export const postAddress = async (req: Request, res: Response) => {
 
 export const deleteAddress = async (req: Request, res: Response) => {
   try {
-    const userId = getUserById(req)
+    const userId = getUserId(req)
     const { id } = req.params
 
     const deleted = await prisma.address.deleteMany({

@@ -73,7 +73,7 @@ export const verifyOtpController = async (req: Request, res: Response) => {
         message: "user not found",
       })
 
-    const { refreshToken, accessToken } = generateTokens(user.id,user.role)
+    const { refreshToken, accessToken } = generateTokens(user.id, user.role)
     await prisma.user.update({
       where: { id: user.id },
       data: { refreshToken: refreshToken },
@@ -103,8 +103,10 @@ export const verifyOtpController = async (req: Request, res: Response) => {
 export const refreshTokenController = async (req: Request, res: Response) => {
   try {
     // console.log("1st log")
-    const userId = req.user?.userId
-    const role = req.user?.role;
+    // const userId = req.headers["x-user-id"] as string | undefined
+    // const role = req.headers["x-user-role"] as "USER" | "ADMIN" | undefined
+
+    const { userId, role } = req.refreshAuth!
     if (!userId)
       return res
         .status(401)
@@ -120,10 +122,10 @@ export const refreshTokenController = async (req: Request, res: Response) => {
         message: "User not found",
       })
     }
-    console.log("1st")
+    // console.log("1st")
 
     const oldToken = req.cookies?.refreshToken
-    console.log(oldToken)
+    // console.log(oldToken)
     if (!oldToken)
       return res
         .status(401)
@@ -139,8 +141,8 @@ export const refreshTokenController = async (req: Request, res: Response) => {
         message: "Token reuse detected",
       })
     }
-    const userRole = role || user.role
-    const { refreshToken, accessToken } = generateTokens(userId,userRole)
+    const userRole = role
+    const { refreshToken, accessToken } = generateTokens(userId, userRole)
 
     await prisma.user.update({
       where: { id: userId },
@@ -166,7 +168,7 @@ export const refreshTokenController = async (req: Request, res: Response) => {
 }
 
 export const logoutController = async (req: Request, res: Response) => {
-  const userId = req.user?.userId
+  const userId = req.headers["x-user-id"] as string
   logger.info(`User ${userId} - logoutController called`)
   try {
     if (!userId) {

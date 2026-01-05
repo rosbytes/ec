@@ -16,9 +16,9 @@ import { validate } from "../middleware/validate.js";
 
 const router: Router = express.Router();
 
-router.get("/", getCart);
+router.get("/", getCart); 
 
-router.post("/increment", validate(AddToCartSchema), addToCart);
+router.post("/increment", validate(AddToCartSchema), addToCart); //pvt
 
 router.post("/decrement", validate(DecrementCartSchema), decrementCartItem);
 

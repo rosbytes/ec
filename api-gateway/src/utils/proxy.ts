@@ -1,44 +1,42 @@
+// utils/proxy.ts
 import proxy from "express-http-proxy";
-import type { Request, Response, RequestHandler } from "express";
+import type { RequestHandler } from "express";
 import { logger } from "./logger.js";
-import type { IncomingMessage, RequestOptions } from "http";
-
-// type ProxyOptions = Record<string, any>;
-interface ProxyOptions {
-  proxyReqPathResolver?: (req: Request) => string;
-  proxyErrorHandler?: (err: Error, res: Response) => void;
-  proxyReqOptDecorator?: (
-    proxyReqOpts: RequestOptions,
-    srcReq: Request
-  ) => RequestOptions | Promise<RequestOptions>;
-  userResDecorator?: (
-    proxyRes: IncomingMessage,
-    proxyResData: Buffer,
-    userReq: Request,
-    userRes: Response
-  ) => Buffer | string | Promise<Buffer | string>;
-  parseReqBody?: boolean;
-}
-
-const baseProxyOptions: ProxyOptions = {
-  proxyReqPathResolver: (req: Request) =>
-    req.originalUrl.replace(/^\/v1/, "/api"),
-
-  proxyErrorHandler: (err: Error, res: Response) => {
-    logger.error(`Proxy error: ${err.message}`);
-    res.status(500).json({
-      message: "Internal server error",
-      error: err.message,
-    });
-  },
-};
 
 export function createProxy(
   serviceUrl: string,
-  extraOptions: ProxyOptions = {}
+  options: { parseReqBody?: boolean } = {}
 ): RequestHandler {
   return proxy(serviceUrl, {
-    ...baseProxyOptions,
-    ...extraOptions,
-  }) as unknown as RequestHandler;
+    proxyReqPathResolver: (req) => req.originalUrl.replace(/^\/v1/, "/api"),
+
+    parseReqBody: options.parseReqBody ?? true,
+
+    proxyReqOptDecorator: (proxyReqOpts, srcReq) => {
+      const headers = proxyReqOpts.headers || {};
+
+      // Preserve original content-type
+      if (srcReq.headers["content-type"]) {
+        headers["content-type"] = srcReq.headers["content-type"];
+      }
+      if (srcReq.headers.cookie) {
+        headers["cookie"] = srcReq.headers.cookie;
+      }
+
+      // Forward identity injected by gateway ONLY
+      if (srcReq.headers["x-user-id"])
+        headers["x-user-id"] = srcReq.headers["x-user-id"];
+
+      if (srcReq.headers["x-user-role"])
+        headers["x-user-role"] = srcReq.headers["x-user-role"];
+
+      proxyReqOpts.headers = headers;
+      return proxyReqOpts;
+    },
+
+    proxyErrorHandler: (err, res) => {
+      logger.error(err);
+      res.status(502).json({ message: "Service unavailable" });
+    },
+  });
 }

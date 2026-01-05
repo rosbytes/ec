@@ -1,30 +1,26 @@
-import { Router } from "express";
+import { Router } from "express"
 import {
   getProfileController,
   updateProfileController,
-} from "../controller/profile-controller";
-import { verifyAccessToken } from "@/middleware/authMiddleware";
-import { validate } from "../middleware/validate";
-import { updateProfileSchema } from "../validator/profile-validator";
-import { defaultLimiter } from "@/middleware/rateLimiter";
+} from "../controller/profile-controller"
 
-const profileRoutes = Router();
+import { validate } from "../middleware/validate"
+import { updateProfileSchema } from "../validator/profile-validator"
+import { defaultLimiter } from "@/middleware/rateLimiter"
 
+const profileRoutes = Router()
 
 profileRoutes.get(
   "/",
   defaultLimiter,
-  verifyAccessToken,
-  getProfileController
-);
-
+  getProfileController,
+)
 
 profileRoutes.patch(
   "/",
   defaultLimiter,
-  verifyAccessToken,
   validate(updateProfileSchema),
-  updateProfileController
-);
+  updateProfileController,
+)
 
-export default profileRoutes;
+export default profileRoutes

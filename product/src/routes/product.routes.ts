@@ -16,14 +16,13 @@ import {
 } from "../validations/product.validations";
 import { verifyAdmin } from "../middleware/authMiddleware";
 import { createMulterUpload } from "../config/multer.config";
-import { getProductDetails } from "../controller/internal.controller";
 
 const router = express.Router();
 
 const upload = createMulterUpload(10);
 
 
-router.get("/internal/:productId/:variantId",getProductDetails)
+
 // admin
 router.post(
   "/",
@@ -41,7 +40,7 @@ router.put(
 );
 router.delete("/:id", verifyAdmin, deleteProduct);
 
-//user
+//user public
 router.get("/", getAllProduct);
 router.get("/:slug", getProductBySlug);
 

@@ -1,5 +1,5 @@
 import type { NextFunction, Request, Response } from "express";
-import { internalGet } from "../utils/helper.js";
+import { internalGet } from "../utils/internalHttp.js"
 import { prisma } from "../utils/prisma.js";
 
 export const addToCart = async (
@@ -20,7 +20,7 @@ export const addToCart = async (
 
     // product details fetch
     const producRes = await internalGet(
-      `${process.env.PRODUCT_SERVICE_URL}/internal/products/${productId}/${variantId}`
+      `${process.env.PRODUCT_SERVICE_URL}/internal/products/${productId}/variants/${variantId}`
     );
 
     const product = producRes.data;

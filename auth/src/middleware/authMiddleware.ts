@@ -5,7 +5,7 @@ import { Request, Response, NextFunction } from "express"
 declare global {
   namespace Express {
     interface Request {
-      user?: {
+      refreshAuth?: {
         userId: string;
         role:"USER" | "ADMIN";
       }
@@ -37,7 +37,7 @@ export const verifyAccessToken = (
       process.env.ACCESS_TOKEN_SECRET!,
     ) as JwtPayloadCustom
 
-    req.user = { userId: decoded.userId,role:decoded.role }
+    req.refreshAuth = { userId: decoded.userId,role:decoded.role }
     next()
   } catch (err) {
     return res.status(401).json({ message: "Invalid or expired access token" })
@@ -69,7 +69,7 @@ export const verifyRefreshToken = (
         message: "Invalid token payload",
       })
     }
-    req.user = { userId: decoded.userId, role: decoded.role as "USER" | "ADMIN" }
+    req.refreshAuth = { userId: decoded.userId, role: decoded.role as "USER" | "ADMIN" }
     next()
   } catch (err) {
     return res.status(401).json({ message: "Invalid or expired refresh token" })

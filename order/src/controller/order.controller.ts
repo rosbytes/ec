@@ -3,8 +3,9 @@ import { prisma } from "../utils/prisma.js";
 import { OrderStatus } from "../generated/prisma/index.js";
 import { razorpay } from "../utils/razorpay.js";
 import crypto from "crypto";
-import { internalGet, internalPost } from "../utils/helper.js";
+import { internalGet, internalPost } from "../utils/internalHttp.js";
 import orders from "razorpay/dist/types/orders.js";
+import products from "razorpay/dist/types/products.js";
 
 const generateOrderId = () => {
   const t = Date.now().toString(36).toUpperCase();
@@ -24,7 +25,7 @@ const getTimeSlot = () => {
 
 const fetchCart = async (userId: string) => {
   const cart = await internalGet(
-    `$process.env.CART_SERVICE_URL/internal/cart`,
+    `${process.env.CART_SERVICE_URL}/api/internal/cart`,
     { userId }
   );
   if (!cart?.items?.length) throw new Error("cart empty");
@@ -233,13 +234,23 @@ export const verifyPayment = async (req: Request, res: Response) => {
 export const paymentWebhook = async (req: Request, res: Response) => {
   try {
     const signature = req.headers["x-razorpay-signature"] as string;
+
+    const rawBody = req.body as Buffer;
+
     const expected = crypto
       .createHmac("sha256", process.env.RAZORPAY_WEBHOOK_SECRET!)
-      .update(req.body)
+      .update(rawBody)
       .digest("hex");
 
     if (expected !== signature) return res.sendStatus(400);
-    if (req.body.event !== "payment.captured") return res.sendStatus(200);
+
+    //parse JSON AFTER verification
+    const payload = JSON.parse(rawBody.toString("utf8"));
+
+    if (payload.event !== "payment.captured") {
+      return res.sendStatus(200);
+    }
+
     const razorpayOrderId = req.body.payload.payment.entity.order_id;
     const paymentId = req.body.payload.payment.entity.id;
     const method = req.body.payload.payment.entity.method;
@@ -261,17 +272,31 @@ export const paymentWebhook = async (req: Request, res: Response) => {
         },
       });
       // stock decrement
-      for (const it of order.items) {
-        await internalPost(
-          `${process.env.PRODUCT_SERVICE_URL}/internal/decrement-stock`,
-          { productId: it.productId, variantId: it.variantId, qty: it.quantity }
-        );
-      }
+      // bad approach -> 5 https calls
+      // for (const it of order.items) {
+      //   await internalPost(
+      //     `${process.env.PRODUCT_SERVICE_URL}/api/internal/decrement-stock`,
+      //     { productId: it.productId, variantId: it.variantId, qty: it.quantity }
+      //   );
+      // }
+
+      await internalPost(
+        `${process.env.PRODUCT_SERVICE_URL}/api/internal/decrement-stock`,
+        {
+          items: order.items.map((it) => ({
+            productId:it.productId,
+            variantId:it.variantId,
+            qty:it.quantity
+          })),
+        }
+      );
+
       // cart clear
-      await internalPost(`${process.env.CART_SERVICE_URL}/internal/clear`, {
+      await internalPost(`${process.env.CART_SERVICE_URL}/api/internal/clear`, {
         userId: order.userId,
       });
     });
+    return res.sendStatus(200);
   } catch (err: any) {
     return res.sendStatus(500).json({
       message: err.stack,

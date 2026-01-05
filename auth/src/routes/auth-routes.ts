@@ -13,7 +13,7 @@ import {
   logoutSchema,
 } from "../validator/auth-validator"
 import {
-  verifyAccessToken,
+ 
   verifyRefreshToken,
 } from "@/middleware/authMiddleware"
 // import { verifyRefreshToken } from "@utils/jwt"
@@ -36,11 +36,11 @@ router.post(
   verifyRefreshToken,
   refreshTokenController,
 )
+
 router.post(
   "/logout",
   defaultLimiter,
   validate(logoutSchema),
-  verifyAccessToken,
   logoutController,
 )
 
