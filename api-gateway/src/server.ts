@@ -1,4 +1,3 @@
-// server.ts
 import cors from "cors";
 import express from "express";
 import helmet from "helmet";
@@ -11,96 +10,108 @@ import {
   PRODUCT_SERVICE_URL,
   CART_SERVICE_URL,
   ORDER_SERVICE_URL,
+  ADDRESS_SERVICE_URL,
 } from "./config/index.js";
 import { verifyToken } from "./middleware/verifyToken.js";
 
+if (!process.env.ACCESS_TOKEN_SECRET || !process.env.INTERNAL_GATEWAY_SECRET) {
+  console.error("CRITICAL: Missing required environment variables (GATEWAY)");
+  process.exit(1);
+}
+
 const app = express();
 
-app.use(helmet());
-app.use(cors());
-// app.use(cors({
-//   origin: process.env.FRONTEND_URL || "http://localhost:5173",
-//   credentials: true,
-// }));
+/*  GLOBAL MIDDLEWARE  */
 
-// Product routes (NO JSON parsing)
+app.use(helmet());
+app.use(
+  cors({
+    origin: process.env.FRONTEND_URL || "http://localhost:5173",
+    credentials: true,
+  })
+);
+
+
+app.use((req, _res, next) => {
+  delete req.headers["x-user-id"];
+  delete req.headers["x-user-role"];
+  delete req.headers["x-internal-token"];
+  next();
+});
+
+app.use((req, _res, next) => {
+  logger.info(`${req.method} ${req.path}`);
+  next();
+});
+
+app.use(rateLimitMiddleware);
+
+/*  WEBHOOKS (NO JSON PARSE)  */
+
+app.use(
+  "/v1/order/payment/webhook",
+  createProxy(ORDER_SERVICE_URL, { parseReqBody: false })
+);
+
+/*  PRODUCTS (FILE UPLOAD / NO JSON)  */
+
 app.use(
   "/v1/products",
   verifyToken,
   createProxy(PRODUCT_SERVICE_URL, { parseReqBody: false })
 );
 
-app.use(
-  "/v1/admin/products",
-  verifyToken, // 👈 token required here,
-  (req,_res,next)=>{
-    req.url = req.url.replace("/admin","")
-    next()
-  },
-  createProxy(PRODUCT_SERVICE_URL, { parseReqBody: false })
-);
+/*  JSON PARSER  */
 
 app.use(express.json());
-app.use(rateLimitMiddleware);
 
-// Request logging
-app.use((req, res, next) => {
-  logger.info(`${req.method} ${req.url}`);
-  next();
-});
+/*  AUTH ROUTES  */
 
-// ========================================
-// 🔓 PUBLIC ROUTES (no authentication)
-// ========================================
-
-// Auth public routes
+//  Public (no JWT, no cookies)
 app.use("/v1/auth/send-otp", createProxy(AUTH_SERVICE_URL));
 app.use("/v1/auth/verify-otp", createProxy(AUTH_SERVICE_URL));
-app.use("/v1/auth/refresh-token", createProxy(AUTH_SERVICE_URL));
 
-// Auth protected routes
-app.use("/v1/auth/logout", verifyToken, createProxy(AUTH_SERVICE_URL));
-
-// User profile & addresses
-app.use("/v1/me/profile", verifyToken, createProxy(AUTH_SERVICE_URL));
-app.use("/v1/me/addresses", verifyToken, createProxy(AUTH_SERVICE_URL));
-app.use("/v1/me/addresses/:id", verifyToken, createProxy(AUTH_SERVICE_URL));
-
-// Cart routes (all protected)
-app.use("/v1/cart", verifyToken, createProxy(CART_SERVICE_URL));
-app.use("/v1/cart/increment", verifyToken, createProxy(CART_SERVICE_URL));
-app.use("/v1/cart/decrement", verifyToken, createProxy(CART_SERVICE_URL));
-app.use("/v1/cart/item/:itemId", verifyToken, createProxy(CART_SERVICE_URL));
-// app.use("/v1/cart", verifyToken, createProxy(CART_SERVICE_URL));
-
-// Order routes (all protected)
-app.use("/v1/order", verifyToken, createProxy(ORDER_SERVICE_URL));
-app.use("/v1/order/:id", verifyToken, createProxy(ORDER_SERVICE_URL));
-app.use("/v1/order/:id/pay", verifyToken, createProxy(ORDER_SERVICE_URL));
+//  Cookie-based (refresh token)
 app.use(
-  "/v1/order/payment/verify",
+  "/v1/auth/refresh-token",
+  createProxy(AUTH_SERVICE_URL, { forwardCookies: true })
+);
+
+//  Protected auth
+app.use(
+  "/v1/auth/logout",
   verifyToken,
-  createProxy(ORDER_SERVICE_URL)
-);
-app.use(
-  "/v1/order/payment/webhook",
-  createProxy(ORDER_SERVICE_URL, { parseReqBody: false })
+  createProxy(AUTH_SERVICE_URL, { forwardCookies: true })
 );
 
-// ========================================
-// HEALTH CHECK
-// ========================================
-app.get("/health", (req, res) => {
-  res.json({ status: "ok", timestamp: new Date().toISOString() });
+/*  USER / DOMAIN ROUTES  */
+
+app.use("/v1/me/profile", verifyToken, createProxy(AUTH_SERVICE_URL));
+
+app.use("/v1/addresses", verifyToken, createProxy(ADDRESS_SERVICE_URL));
+
+app.use("/v1/cart", verifyToken, createProxy(CART_SERVICE_URL));
+
+app.use("/v1/order", verifyToken, createProxy(ORDER_SERVICE_URL));
+
+/*  HEALTH CHECK  */
+
+app.get("/health", (_req, res) => {
+  res.json({
+    status: "ok",
+    timestamp: new Date().toISOString(),
+    services: {
+      auth: AUTH_SERVICE_URL,
+      products: PRODUCT_SERVICE_URL,
+      cart: CART_SERVICE_URL,
+      orders: ORDER_SERVICE_URL,
+      addresses: ADDRESS_SERVICE_URL,
+    },
+  });
 });
 
-// ========================================
-// START SERVER
-// ========================================
+/*  START SERVER  */
+
 app.listen(PORT, () => {
-  logger.info(`✅ API Gateway running on port: ${PORT}`);
-  logger.info(`📡 Auth Service: ${AUTH_SERVICE_URL}`);
-  logger.info(`📦 Product Service: ${PRODUCT_SERVICE_URL}`);
-  logger.info(`🛒 Cart Service: ${CART_SERVICE_URL}`);
-  logger.info(`📋 Order Service: ${ORDER_SERVICE_URL}`);
+  logger.info(`API Gateway running on port: ${PORT}`);
 });

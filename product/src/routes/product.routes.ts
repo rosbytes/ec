@@ -4,9 +4,9 @@ import {
   deleteProduct,
   getAllProduct,
   getProductBySlug,
-  
- 
-  
+
+
+
   updateProduct,
 } from "../controller/product.controller";
 import { validate } from "../middleware/validate";
@@ -16,12 +16,14 @@ import {
 } from "../validations/product.validations";
 import { verifyAdmin } from "../middleware/authMiddleware";
 import { createMulterUpload } from "../config/multer.config";
+import { requireGateway } from "../middleware/requireGateway";
 
 const router = express.Router();
 
 const upload = createMulterUpload(10);
 
-
+// Apply gateway validation to ALL routes
+router.use(requireGateway);
 
 // admin
 router.post(
@@ -45,3 +47,4 @@ router.get("/", getAllProduct);
 router.get("/:slug", getProductBySlug);
 
 export default router;
+

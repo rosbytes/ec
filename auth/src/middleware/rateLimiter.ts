@@ -28,15 +28,28 @@ export const limiterMiddleware = (
       await limiter.consume(key)
       next()
     } catch (err) {
-      logger?.warn?.(`Rate limit exceeded for key: ${req.ip}`)
+      logger.warn({
+        message: "Rate limit exceeded",
+
+        path: req.path,
+        ip: req.ip,
+      })
+
       res.status(429).json({ success: false, message: "Too many requests" })
     }
   }
 }
 
-export const otpLimiter = limiterMiddleware(
-  sensitiveLimiter,
-  (req) => req.body?.phone || req.ip,
-)
+export const otpLimiter = limiterMiddleware(sensitiveLimiter, (req) => {
+  let phone = req.body?.phone
+  if (!phone) return req.ip
+  if (!phone.startsWith("+")) phone = "+91" + phone
+  return phone
+})
 
 export const defaultLimiter = limiterMiddleware(flexibleLimiter)
+
+export const userLimiter = limiterMiddleware(
+  flexibleLimiter,
+  (req) => req.refreshAuth?.userId || req.ip,
+)

@@ -1,6 +1,7 @@
 import twilio from "twilio"
 import dotenv from "dotenv"
 import generateOtp from "./generateOtp"
+import { ApiError } from "./ApiError"
 dotenv.config()
 
 const accountSid = process.env.TWILIO_ACCOUNT_SID!
@@ -13,7 +14,7 @@ export async function sendOtp(to: string, otp: string): Promise<void> {
   try {
     // Always ensure E.164 format (+91xxxxxxxxxx)
     if (!to.startsWith("+")) {
-     throw new Error()
+      throw new ApiError(400, "Invalid phone number format")
     }
 
     const message = await client.messages.create({
@@ -29,6 +30,6 @@ export async function sendOtp(to: string, otp: string): Promise<void> {
       message: error.message,
       info: error.moreInfo,
     })
-    throw new Error(`Twilio Error: ${error.message}`)
+    throw new ApiError(500, `Twilio Error: ${error.message}`)
   }
 }

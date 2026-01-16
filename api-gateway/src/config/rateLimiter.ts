@@ -1,6 +1,6 @@
 import rateLimit from "express-rate-limit";
 import { RedisStore } from "rate-limit-redis";
-import Redis from "ioredis";
+import { Redis } from "ioredis";
 import { logger } from "../utils/logger.js"; 
 import { REDIS_URL } from "../config/index.js"; 
 import type { Request, Response } from "express";
@@ -19,6 +19,6 @@ export const rateLimitMiddleware = rateLimit({
   },
 
   store: new RedisStore({
-    sendCommand: (...args: string[]) => redisClient.call(...args),
+    sendCommand: (...args: string[]) => redisClient.call(...(args as [string, ...string[]])) as Promise<any>
   }),
 });

@@ -9,5 +9,9 @@ if (!redisUrl) {
 
 export const redisClient = new Redis(redisUrl)
 
+redisClient.on("ready", () => {
+  console.log("Redis is READY and usable")
+})
+
 redisClient.on("connect", () => console.log(" Connected to Redis"))
-redisClient.on("error", (err) => console.error(" Redis error:", err))
+redisClient.on("error", (err) => console.error(" Redis error:", err?.stack,err.message))

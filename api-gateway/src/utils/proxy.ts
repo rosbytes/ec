@@ -5,30 +5,39 @@ import { logger } from "./logger.js";
 
 export function createProxy(
   serviceUrl: string,
-  options: { parseReqBody?: boolean } = {}
+  options: {
+    parseReqBody?: boolean;
+    forwardCookies?: boolean;
+  } = {}
 ): RequestHandler {
   return proxy(serviceUrl, {
-    proxyReqPathResolver: (req) => req.originalUrl.replace(/^\/v1/, "/api"),
+    proxyReqPathResolver: (req) =>
+      req.originalUrl.replace(/^\/v1/, "/api"),
 
     parseReqBody: options.parseReqBody ?? true,
 
     proxyReqOptDecorator: (proxyReqOpts, srcReq) => {
       const headers = proxyReqOpts.headers || {};
 
-      // Preserve original content-type
       if (srcReq.headers["content-type"]) {
         headers["content-type"] = srcReq.headers["content-type"];
       }
-      if (srcReq.headers.cookie) {
-        headers["cookie"] = srcReq.headers.cookie;
+
+      // 🔐 gateway trust
+      headers["x-internal-token"] =
+        process.env.INTERNAL_GATEWAY_SECRET!;
+
+      // 👤 user context
+      const user = (srcReq as any).user;
+      if (user) {
+        headers["x-user-id"] = user.userId;
+        headers["x-user-role"] = user.role;
       }
 
-      // Forward identity injected by gateway ONLY
-      if (srcReq.headers["x-user-id"])
-        headers["x-user-id"] = srcReq.headers["x-user-id"];
-
-      if (srcReq.headers["x-user-role"])
-        headers["x-user-role"] = srcReq.headers["x-user-role"];
+      // 🍪 forward cookies ONLY when needed
+      if (options.forwardCookies && srcReq.headers.cookie) {
+        headers["cookie"] = srcReq.headers.cookie;
+      }
 
       proxyReqOpts.headers = headers;
       return proxyReqOpts;

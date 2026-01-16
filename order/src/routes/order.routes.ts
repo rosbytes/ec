@@ -1,9 +1,28 @@
 import { Router } from "express";
-import { createOrder, getOrderById, getOrders, paymentWebhook, payOrder, verifyPayment } from "../controller/order.controller.js";
+import {
+    createOrder,
+    getOrderById,
+    getOrders,
+    payOrder,
+    paymentWebhook,
+    verifyPayment,
+} from "../controller/order.controller.js";
+import { createOrderLimiter, paymentLimiter } from "../middleware/rateLimiter.js";
+import { requireGateway } from "../middleware/requireGateway.js";
+import { validate } from "../middleware/validate.js";
+import {
+    CreateOrderSchema,
+    PayOrderSchema,
+    VerifyPaymentSchema,
+} from "../validations/order.schema.js";
 
-const orderRoutes= Router()
+const orderRoutes = Router();
 
-orderRoutes.post("/", createOrder);
+// Apply gateway validation to ALL routes
+orderRoutes.use(requireGateway);
+
+// create order
+orderRoutes.post("/", createOrderLimiter, validate(CreateOrderSchema), createOrder);
 
 // get all orders for logged-in user
 orderRoutes.get("/", getOrders);
@@ -16,13 +35,9 @@ orderRoutes.get("/:id", getOrderById);
  */
 
 // pay an order (COD or Online)
-orderRoutes.post("/:id/pay", payOrder);
+orderRoutes.post("/:id/pay", paymentLimiter, validate(PayOrderSchema), payOrder);
 
 // verify razorpay payment (client-side verification)
-orderRoutes.post("/payment/verify", verifyPayment);
+orderRoutes.post("/payment/verify", paymentLimiter, validate(VerifyPaymentSchema), verifyPayment);
 
-// razorpay webhook (server-to-server)
-// orderRoutes.post("/payment/webhook", paymentWebhook);
-
-
-export default orderRoutes
+export default orderRoutes;

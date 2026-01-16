@@ -1,4 +1,4 @@
-import { Schema, model, Document,Types } from "mongoose";
+import { Schema, model, Document, Types } from "mongoose";
 import slugify from "slugify";
 
 interface IVariant {
@@ -12,6 +12,7 @@ interface IImage {
   public_id: string;
   url: string;
   mimeType?: string;
+  isPrimary?: boolean;
 }
 
 export interface IProduct extends Document {
@@ -42,6 +43,7 @@ const ImageSchema = new Schema<IImage>(
     public_id: { type: String, required: true },
     url: { type: String, required: true },
     mimeType: { type: String },
+    isPrimary: { type: Boolean, default: false },
   },
   {
     _id: false,
@@ -53,7 +55,11 @@ const ProductSchema = new Schema<IProduct>(
     name: { type: String, required: true, trim: true },
     localName: { type: String, trim: true },
     slug: { type: String, unique: true },
-    category: { type: String, required: true, trim: true },
+    category: {
+      type: String,
+      index: true,
+    },
+
     description: { type: String, trim: true },
     image: { type: [ImageSchema], default: [] },
     variants: { type: [VariantSchema], required: true },
@@ -64,11 +70,24 @@ const ProductSchema = new Schema<IProduct>(
   { timestamps: true }
 );
 
+ProductSchema.index({
+  name: "text",
+  localName: "text",
+  tags: "text",
+});
+ProductSchema.index({ name: 1 });
+ProductSchema.index({ localName: 1 });
+ProductSchema.index({ isFeatured: 1 });
+ProductSchema.index({ isActive: 1 });
+
 ProductSchema.pre("save", async function (next) {
   if (!this.isModified("name")) return next();
 
   let slugValue = slugify(this.name, { lower: true, strict: true });
-  const existing = await (this.constructor as any).findOne({ slug: slugValue });
+  const existing = await (this.constructor as any).findOne({
+    slug: slugValue,
+    _id: { $ne: this._id },
+  });
 
   if (existing) slugValue = `${slugValue}-${Date.now()}`;
   this.slug = slugValue;

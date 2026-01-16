@@ -40,6 +40,8 @@ model Order {
   updatedAt         DateTime      @updatedAt
   
   items             OrderItem[]
+
+  @@index([userId])
 }
 
 model OrderItem{

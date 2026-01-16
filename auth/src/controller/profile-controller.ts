@@ -1,61 +1,56 @@
 import { Request, Response } from "express"
 import { prisma } from "../utils/prisma"
+import { asyncHandler } from "../middleware/asyncHandler";
+import { ApiError } from "../utils/ApiError";
 
 function getUserId(req: Request): string {
   const userId = req.headers["x-user-id"] as string;
-  
+
   if (!userId) {
-    throw new Error("Unauthorized");
+    throw new ApiError(401, "Unauthorized");
   }
-  
+
   return userId;
 }
 
-export const getProfileController = async (req: Request, res: Response) => {
-  try {
-    const userId = getUserId(req)
+export const getProfileController = asyncHandler(async (req: Request, res: Response) => {
+  const userId = getUserId(req)
 
-    const user = await prisma.user.findUnique({
-      where: { id: userId },
-      select: {
-        id: true,
-        name: true,
+  const user = await prisma.user.findUnique({
+    where: { id: userId },
+    select: {
+      id: true,
+      name: true,
 
-        phone: true,
-        createdAt: true,
-      },
-    })
+      phone: true,
+      createdAt: true,
+    },
+  })
 
-    if (!user) {
-      return res.status(404).json({ message: "User not found" })
-    }
-
-    res.json(user)
-  } catch (err: any) {
-    res.status(401).json({ message: "Unauthorized" })
+  if (!user) {
+    throw new ApiError(404, "User not found");
   }
-}
 
-export const updateProfileController = async (req: Request, res: Response) => {
-  try {
-    const userId = getUserId(req) // userID
+  res.json(user)
+});
 
-    const { name, phone } = req.body
+export const updateProfileController = asyncHandler(async (req: Request, res: Response) => {
+  const userId = getUserId(req) // userID
 
-    const user = await prisma.user.update({
-      where: { id: userId },
-      data: {
-        name,
-        phone,
-      },
-    })
+  const { name, phone } = req.body
 
-    res.json({
-      id: user.id,
-      name: user.name,
-      phone: user.phone,
-    })
-  } catch (err: any) {
-    res.status(401).json({ message: "Unauthorized" })
-  }
-}
+  const user = await prisma.user.update({
+    where: { id: userId },
+    data: {
+      name,
+      phone,
+    },
+  })
+
+  res.json({
+    id: user.id,
+    name: user.name,
+    phone: user.phone,
+  })
+});
+

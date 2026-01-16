@@ -12,12 +12,10 @@ import {
   refreshTokenSchema,
   logoutSchema,
 } from "../validator/auth-validator"
-import {
- 
-  verifyRefreshToken,
-} from "@/middleware/authMiddleware"
+import { verifyRefreshToken } from "@/middleware/authMiddleware"
 // import { verifyRefreshToken } from "@utils/jwt"
-import { defaultLimiter, otpLimiter } from "@/middleware/rateLimiter"
+import { defaultLimiter, otpLimiter, userLimiter } from "@/middleware/rateLimiter"
+import { requireGateway } from "@/middleware/requireGateway"
 
 const router = express.Router()
 
@@ -31,17 +29,12 @@ router.post(
 
 router.post(
   "/refresh-token",
-  defaultLimiter,
+  userLimiter,
   validate(refreshTokenSchema),
   verifyRefreshToken,
   refreshTokenController,
 )
 
-router.post(
-  "/logout",
-  defaultLimiter,
-  validate(logoutSchema),
-  logoutController,
-)
+router.post("/logout",requireGateway, defaultLimiter, validate(logoutSchema), logoutController)
 
 export default router

@@ -1,19 +1,18 @@
 import { prisma } from "../utils/prisma"
 import { redisClient } from "../utils/redisClient"
 import { sendOtp } from "../utils/twilio"
-import { generateTokens, verifyRefreshToken } from "../utils/jwt"
+import { generateTokens } from "../utils/jwt"
 import logger from "@configs/logger.config"
 import { Request, Response } from "express"
 import generateOtp from "@utils/generateOtp"
+import { ApiError } from "../utils/ApiError"
+import { asyncHandler } from "../middleware/asyncHandler"
 
-export const sendOtpController = async (req: Request, res: Response) => {
-  try {
+export const sendOtpController = asyncHandler(
+  async (req: Request, res: Response) => {
     let { phone } = req.body
     if (!phone) {
-      return res.status(400).json({
-        message: "phone required",
-        success: false,
-      })
+      throw new ApiError(400, "phone required")
     }
     if (!phone.startsWith("+")) {
       phone = "+91" + phone
@@ -36,42 +35,32 @@ export const sendOtpController = async (req: Request, res: Response) => {
     console.log("3:")
 
     return res.json({ success: true, message: "OTP sent successfully" })
-  } catch (err) {
-    console.error("Error sending OTP:", err)
-    return res.status(500).json({ success: false, message: "Server error" })
-  }
-}
+  },
+)
 
-export const verifyOtpController = async (req: Request, res: Response) => {
-  try {
+export const verifyOtpController = asyncHandler(
+  async (req: Request, res: Response) => {
     const { phone, otp } = req.body
 
     if (!phone || !otp) {
-      return res
-        .status(400)
-        .json({ success: false, message: "Phone and OTP required" })
+      throw new ApiError(400, "Phone and OTP required")
     }
 
     const storedOtp = await redisClient.get(`otp:${phone}`)
-    if (!storedOtp)
-      return res
-        .status(400)
-        .json({ success: false, message: "OTP expired or not found" })
+    if (!storedOtp) {
+      throw new ApiError(400, "OTP expired or not found")
+    }
 
-    if (storedOtp != String(otp))
-      return res.status(400).json({
-        success: false,
-        message: "Invalid OTP",
-      })
+    if (storedOtp != String(otp)) {
+      throw new ApiError(400, "Invalid OTP")
+    }
 
     const user = await prisma.user.findUnique({
       where: { phone },
     })
-    if (!user)
-      return res.status(404).json({
-        success: false,
-        message: "user not found",
-      })
+    if (!user) {
+      throw new ApiError(404, "user not found")
+    }
 
     const { refreshToken, accessToken } = generateTokens(user.id, user.role)
     await prisma.user.update({
@@ -94,52 +83,41 @@ export const verifyOtpController = async (req: Request, res: Response) => {
       message: "OTP verified",
       user: { id: user.id, phone: user.phone },
     })
-  } catch (err) {
-    console.error("Error verifying OTP:", err)
-    return res.status(500).json({ success: false, message: "Server error" })
-  }
-}
+  },
+)
 
-export const refreshTokenController = async (req: Request, res: Response) => {
-  try {
+export const refreshTokenController = asyncHandler(
+  async (req: Request, res: Response) => {
     // console.log("1st log")
     // const userId = req.headers["x-user-id"] as string | undefined
     // const role = req.headers["x-user-role"] as "USER" | "ADMIN" | undefined
 
     const { userId, role } = req.refreshAuth!
-    if (!userId)
-      return res
-        .status(401)
-        .json({ success: false, message: "Unauthorized: No user" })
+    if (!userId) {
+      throw new ApiError(401, "Unauthorized: No user")
+    }
 
     const user = await prisma.user.findUnique({
       where: { id: userId },
     })
 
     if (!user) {
-      return res.status(404).json({
-        success: false,
-        message: "User not found",
-      })
+      throw new ApiError(404, "User not found")
     }
     // console.log("1st")
 
     const oldToken = req.cookies?.refreshToken
     // console.log(oldToken)
-    if (!oldToken)
-      return res
-        .status(401)
-        .json({ success: false, message: "Missing refresh token" })
+    if (!oldToken) {
+      throw new ApiError(401, "Missing refresh token")
+    }
 
     if (user.refreshToken !== oldToken) {
       await prisma.user.update({
         where: { id: userId },
         data: { refreshToken: null },
       })
-      return res.status(403).json({
-        success: false,
-        message: "Token reuse detected",
-      })
+      throw new ApiError(403, "Token reuse detected")
     }
     const userRole = role
     const { refreshToken, accessToken } = generateTokens(userId, userRole)
@@ -161,21 +139,17 @@ export const refreshTokenController = async (req: Request, res: Response) => {
       message: "Access token refreshed",
       accessToken,
     })
-  } catch (err) {
-    console.error("Error refreshing token:", err)
-    return res.status(500).json({ success: false, message: "Server error" })
-  }
-}
+  },
+)
 
-export const logoutController = async (req: Request, res: Response) => {
-  const userId = req.headers["x-user-id"] as string
-  logger.info(`User ${userId} - logoutController called`)
-  try {
+export const logoutController = asyncHandler(
+  async (req: Request, res: Response) => {
+    const userId = req.user?.userId
+    logger.info(`User ${userId} - logoutController called`)
+
     if (!userId) {
       logger.warn("logout called without userId")
-      return res
-        .status(400)
-        .json({ success: false, message: "userId required" })
+      throw new ApiError(400, "userId required")
     }
     await prisma.user.update({
       where: { id: userId },
@@ -184,8 +158,5 @@ export const logoutController = async (req: Request, res: Response) => {
     res.clearCookie("refreshToken")
     logger.info(`user logged out`)
     return res.json({ success: true, message: "Logged out successfully" })
-  } catch (err) {
-    logger.error(`error ${err} logging out`)
-    return res.status(500).json({ success: false, message: "Server error" })
-  }
-}
+  },
+)

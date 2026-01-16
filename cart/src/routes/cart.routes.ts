@@ -6,6 +6,7 @@ import {
   clearCart,
   getCart,
 } from "../controller/cart.controller.js";
+import { addToCartLimiter } from "../middleware/rateLimiter.js";
 
 import {
   AddToCartSchema,
@@ -13,17 +14,22 @@ import {
 } from "../validations/cart.schema.js";
 
 import { validate } from "../middleware/validate.js";
+import { requireGateway } from "../middleware/requireGateway.js";
 
 const router: Router = express.Router();
 
-router.get("/", getCart); 
+// Apply gateway validation to ALL routes
+router.use(requireGateway);
 
-router.post("/increment", validate(AddToCartSchema), addToCart); //pvt
+router.get("/", getCart);
 
-router.post("/decrement", validate(DecrementCartSchema), decrementCartItem);
+router.post("/increment", addToCartLimiter, validate(AddToCartSchema), addToCart); //pvt
+
+router.post("/decrement", addToCartLimiter, validate(DecrementCartSchema), decrementCartItem);
 
 router.delete("/item/:itemId", removeCartItem);
 
 router.delete("/", clearCart);
 
 export default router;
+

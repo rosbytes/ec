@@ -4,8 +4,9 @@ import { OrderStatus } from "../generated/prisma/index.js";
 import { razorpay } from "../utils/razorpay.js";
 import crypto from "crypto";
 import { internalGet, internalPost } from "../utils/internalHttp.js";
-import orders from "razorpay/dist/types/orders.js";
-import products from "razorpay/dist/types/products.js";
+import { asyncHandler } from "../middleware/asyncHandler.js";
+import { ApiError } from "../utils/ApiError.js";
+
 
 const generateOrderId = () => {
   const t = Date.now().toString(36).toUpperCase();
@@ -24,11 +25,13 @@ const getTimeSlot = () => {
 };
 
 const fetchCart = async (userId: string) => {
-  const cart = await internalGet(
+  const response = await internalGet(
     `${process.env.CART_SERVICE_URL}/api/internal/cart`,
     { userId }
   );
-  if (!cart?.items?.length) throw new Error("cart empty");
+  // Internal API now returns { success: true, data: cart }
+  const cart = response?.data;
+  if (!cart?.items?.length) throw new ApiError(400, "cart empty");
   return cart;
 };
 
@@ -38,14 +41,14 @@ const validateCartAndTotal = async (cart: any) => {
     // cart items
     //product fetch
     const prod = await internalGet(
-      `${process.env.PRODUCT_SERVICE_URL}/internal/${item.productId}/${item.variantId}`
+      `${process.env.PRODUCT_SERVICE_URL}/api/internal/products/${item.productId}/variants/${item.variantId}`
     );
     const p = prod.data ?? prod;
     if (!p.isActive || !p.isAvailable)
-      throw new Error(`${item.name} unavailable`);
+      throw new ApiError(400, `${item.name} unavailable`);
 
     if (item.quantity > p.stock) {
-      throw new Error(`${p.stock} left for ${item.name}`);
+      throw new ApiError(400, `${p.stock} left for ${item.name}`);
     }
 
     total += item.price * item.quantity;
@@ -55,181 +58,146 @@ const validateCartAndTotal = async (cart: any) => {
 /**
  * create order
  */
-export const createOrder = async (req: Request, res: Response) => {
-  try {
-    const userId = req.headers["x-user-id"] as string;
-    const { shippingAddress } = req.body;
+export const createOrder = asyncHandler(async (req: Request, res: Response) => {
+  const userId = req.headers["x-user-id"] as string;
+  const { shippingAddress } = req.body;
 
-    if (!shippingAddress) {
-      return res.status(400).json({
-        message: "shipping address required",
-      });
-    }
-    // fetch cart
-    const cart = await fetchCart(userId);
-    const itemsTotal = await validateCartAndTotal(cart);
+  if (!shippingAddress) {
+    throw new ApiError(400, "shipping address required");
+  }
+  // fetch cart
+  const cart = await fetchCart(userId);
+  const itemsTotal = await validateCartAndTotal(cart);
 
-    const deliveryCharge = 30;
-    const grandTotal = itemsTotal + deliveryCharge;
-    const { slot, expectedDelivery } = getTimeSlot();
+  const deliveryCharge = 30;
+  const grandTotal = itemsTotal + deliveryCharge;
+  const { slot, expectedDelivery } = getTimeSlot();
 
-    const order = await prisma.$transaction(async (tx) => {
-      const created = await tx.order.create({
-        data: {
-          orderNumber: generateOrderId(),
-          userId,
-          status: OrderStatus.PENDING_PAYMENT,
-          totalAmount: grandTotal,
-          itemsTotal,
-          deliveryCharge,
-          shippingAddress,
-          slot,
-          expectedDelivery,
-        },
-      });
-
-      await tx.orderItem.createMany({
-        data: cart.items.map((i: any) => ({
-          orderId: created.id,
-          productId: i.productId,
-          variantId: i.variantId,
-          name: i.name,
-          localName: i.localName,
-          image: i.image,
-          label: i.label,
-          price: i.price,
-          quantity: i.quantity,
-        })),
-      });
-      return created;
+  const order = await prisma.$transaction(async (tx) => {
+    const created = await tx.order.create({
+      data: {
+        orderNumber: generateOrderId(),
+        userId,
+        status: OrderStatus.PENDING_PAYMENT,
+        totalAmount: grandTotal,
+        itemsTotal,
+        deliveryCharge,
+        shippingAddress,
+        slot,
+        expectedDelivery,
+      },
     });
-    return res.json({
+
+    await tx.orderItem.createMany({
+      data: cart.items.map((i: any) => ({
+        orderId: created.id,
+        productId: i.productId,
+        variantId: i.variantId,
+        name: i.name,
+        localName: i.localName,
+        image: i.image,
+        label: i.label,
+        price: i.price,
+        quantity: i.quantity,
+      })),
+    });
+    return created;
+  });
+  return res.json({
+    success: true,
+    data: {
       orderId: order.id,
       orderNumber: order.orderNumber,
       totalAmount: grandTotal,
-    });
+    }
+  });
+});
 
-    //   if (paymentMode === "COD") {
-    //    await prisma.order.update({
-    // where:{id:}
-    //    })
-    //   }
+export const payOrder = asyncHandler(async (req: Request, res: Response) => {
+  const userId = req.headers["x-user-id"] as string;
+  const { id } = req.params;
+  const { paymentMode } = req.body;
 
-    //   const rOrder = await razorpay.orders.create({
-    //     amount: grandTotal * 100,
-    //     currency: "INR",
-    //     receipt: order.orderNumber,
-    //   });
-
-    //   await prisma.order.update({
-    //     where: { id: order.id },
-    //     data: {
-    //       paymentProvider: "razorpay",
-    //       paymentOrderId: rOrder.id,
-    //     },
-    //   });
-
-    //   return res.json({
-    //     message: "Order created",
-    //     orderId: order.id,
-    //     orderNumber: order.orderNumber,
-    //     razorpayOrderId: rOrder.id,
-    //     amount: grandTotal * 100,
-    //     currency: "INR",
-    //     keyId: process.env.RAZORPAY_KEY_ID,
-    //   });
-  } catch (err: any) {
-    console.error("createOrder:", err);
-    return res.status(500).json({ message: err.message });
+  if (!id) {
+    throw new ApiError(400, "Order id is required");
   }
-};
+  const order = await prisma.order.findUnique({
+    where: { id },
+  });
 
-export const payOrder = async (req: Request, res: Response) => {
-  try {
-    const userId = req.headers["x-user-id"] as string;
-    const { id } = req.params;
-    const { paymentMode } = req.body;
+  if (!order || order.userId !== userId) {
+    throw new ApiError(404, "Order not found");
+  }
 
-    if (!id) {
-      return res.status(400).json({ message: "Order id is required" });
-    }
-    const order = await prisma.order.findUnique({
-      where: { id },
-    });
+  if (order.status !== OrderStatus.PENDING_PAYMENT) {
+    throw new ApiError(400, "Order not payable");
+  }
 
-    if (!order || order.userId !== userId) {
-      return res.status(404).json({ message: "Order not found" });
-    }
-
-    if (order.status !== OrderStatus.PENDING_PAYMENT)
-      return res.status(400).json({ message: "Order not payable" });
-
-    /* cod */
-    if (paymentMode === "COD") {
-      await prisma.order.update({
-        where: { id: order.id },
-        data: {
-          status: OrderStatus.PAID,
-          paymentMethod: "COD",
-        },
-      });
-      return res.json({ status: "PAID", paymentMode: "COD" });
-    }
-
-    /* online payment */
-    const rOrder = await razorpay.orders.create({
-      amount: order.totalAmount * 100,
-      currency: "INR",
-      receipt: order.orderNumber,
-      notes: {
-        orderId: order.id,
-        userId: order.userId,
-      },
-    });
-
+  /* cod */
+  if (paymentMode === "COD") {
     await prisma.order.update({
       where: { id: order.id },
       data: {
-        paymentProvider: "razorpay",
-        paymentOrderId: rOrder.id,
+        status: OrderStatus.PAID,
+        paymentMethod: "COD",
       },
     });
-
     return res.json({
+      success: true,
+      data: { status: "PAID", paymentMode: "COD" }
+    });
+  }
+
+  /* online payment */
+  const rOrder = await razorpay.orders.create({
+    amount: order.totalAmount * 100,
+    currency: "INR",
+    receipt: order.orderNumber,
+    notes: {
+      orderId: order.id,
+      userId: order.userId,
+    },
+  });
+
+  await prisma.order.update({
+    where: { id: order.id },
+    data: {
+      paymentProvider: "razorpay",
+      paymentOrderId: rOrder.id,
+    },
+  });
+
+  return res.json({
+    success: true,
+    data: {
       orderId: order.id,
       orderNumber: order.orderNumber,
       razorpayOrderId: rOrder.id,
       amount: order.totalAmount * 100,
       keyId: process.env.RAZORPAY_KEY_ID,
-    });
-  } catch (err: any) {
-    return res.status(400).json({ message: err.message });
-  }
-};
+    }
+  });
+});
 
 /* verify stock */
 
-export const verifyPayment = async (req: Request, res: Response) => {
-  try {
-    const { razorpay_order_id, razorpay_payment_id, razorpay_signature } =
-      req.body;
+export const verifyPayment = asyncHandler(async (req: Request, res: Response) => {
+  const { razorpay_order_id, razorpay_payment_id, razorpay_signature } =
+    req.body;
 
-    const body = `${razorpay_order_id}|${razorpay_payment_id}`;
-    const expected = crypto
-      .createHmac("sha256", process.env.RAZORPAY_KEY_SECRET!)
-      .update(body)
-      .digest("hex");
+  const body = `${razorpay_order_id}|${razorpay_payment_id}`;
+  const expected = crypto
+    .createHmac("sha256", process.env.RAZORPAY_KEY_SECRET!)
+    .update(body)
+    .digest("hex");
 
-    if (expected !== razorpay_signature)
-      return res.status(400).json({ message: "Invalid signature" });
-
-    // just return success for ui
-    return res.json({ status: "PAYMENT_SUCCESS" });
-  } catch (err: any) {
-    console.log(err.stack);
-    return res.sendStatus(500).json({ message: "Verification failed" });
+  if (expected !== razorpay_signature) {
+    throw new ApiError(400, "Invalid signature");
   }
-};
+
+  // just return success for ui
+  return res.json({ success: true, data: { status: "PAYMENT_SUCCESS" } });
+});
 
 export const paymentWebhook = async (req: Request, res: Response) => {
   try {
@@ -284,9 +252,9 @@ export const paymentWebhook = async (req: Request, res: Response) => {
         `${process.env.PRODUCT_SERVICE_URL}/api/internal/decrement-stock`,
         {
           items: order.items.map((it) => ({
-            productId:it.productId,
-            variantId:it.variantId,
-            qty:it.quantity
+            productId: it.productId,
+            variantId: it.variantId,
+            qty: it.quantity
           })),
         }
       );
@@ -298,15 +266,17 @@ export const paymentWebhook = async (req: Request, res: Response) => {
     });
     return res.sendStatus(200);
   } catch (err: any) {
-    return res.sendStatus(500).json({
-      message: err.stack,
+    console.error("Webhook Error:", err.message);
+    return res.status(500).json({
+      success: false,
+      message: "Internal server error",
     });
   }
 };
 
 /* get order */
 
-export const getOrders = async (req: Request, res: Response) => {
+export const getOrders = asyncHandler(async (req: Request, res: Response) => {
   const userId = req.headers["x-user-id"] as string;
 
   const orders = await prisma.order.findMany({
@@ -315,15 +285,15 @@ export const getOrders = async (req: Request, res: Response) => {
     orderBy: { createdAt: "desc" },
   });
 
-  return res.json(orders);
-};
+  return res.json({ success: true, data: orders });
+});
 
-export const getOrderById = async (req: Request, res: Response) => {
+export const getOrderById = asyncHandler(async (req: Request, res: Response) => {
   const userId = req.headers["x-user-id"] as string;
   const { id } = req.params;
 
   if (!id) {
-    return res.status(400).json({ message: "Order id is required" });
+    throw new ApiError(400, "Order id is required");
   }
 
   const order = await prisma.order.findFirst({
@@ -331,7 +301,11 @@ export const getOrderById = async (req: Request, res: Response) => {
     include: { items: true },
   });
 
-  if (!order || order.userId !== userId)
-    return res.status(404).json({ message: "Order not found" });
-  return res.json(order);
-};
+  if (!order || order.userId !== userId) {
+    throw new ApiError(404, "Order not found");
+  }
+  return res.json({ success: true, data: order });
+});
+
+
+

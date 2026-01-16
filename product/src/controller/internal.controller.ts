@@ -1,137 +1,127 @@
 import { Request, Response, NextFunction } from "express";
 import { Product } from "../model/product.model";
-import logger from "../config/logger.config";
+import { asyncHandler } from "../middleware/asyncHandler";
+import { ApiError } from "../utils/ApiError";
 
-export const getProductDetails = async (req: Request, res: Response) => {
-  try {
-    const { productId, variantId } = req.params;
-    const product = await Product.findById(productId);
-    if (!product) {
-      return res.status(404).json({ message: "Product not found" });
-    }
+export const getProductDetails = asyncHandler(async (req: Request, res: Response) => {
+  const { productId, variantId } = req.params;
+  const product = await Product.findById(productId);
+  if (!product) {
+    throw new ApiError(404, "Product not found");
+  }
+
+  const variant = product.variants.find(
+    (v) => v._id.toString() === variantId
+  );
+
+  if (!variant) {
+    throw new ApiError(404, "Variant not found");
+  }
+
+  return res.json({
+    productId: product._id,
+    variantId: variant._id,
+    name: product.name,
+    localName: product.localName,
+    category: product.category,
+    label: variant.label,
+    price: variant.price,
+    stock: variant.stock,
+    isAvailable: variant.isAvailable,
+    image: product.image,
+    isActive: product.isActive,
+  });
+});
+
+export const decrementBulk = asyncHandler(async (req: Request, res: Response) => {
+  const { items } = req.body;
+  if (!Array.isArray(items) || items.length === 0) {
+    throw new ApiError(400, "invalid items array");
+  }
+
+  for (const it of items) {
+    const product = await Product.findOne({
+      _id: it.productId,
+      // for nested array ele
+      "variants._id": it.variantId,
+    });
+
+    if (!product)
+      throw new ApiError(404, `Product or variant not found: ${it.productId}`);
 
     const variant = product.variants.find(
-      (v) => v._id.toString() === variantId
+      (v) => v._id.toString() === it.variantId
     );
 
-    if (!variant) {
-      return res.status(404).json({ message: "Variant not found" });
-    }
+    if (!variant) throw new ApiError(404, `Variant not found: ${it.variantId}`);
 
-    return res.json({
-      productId: product._id,
-      variantId: variant._id,
-      name: product.name,
-      localName: product.localName,
-      category: product.category,
-      label: variant.label,
-      price: variant.price,
-      stock: variant.stock,
-      isAvailable: variant.isAvailable,
-      image: product.image,
-      isActive: product.isActive,
+    if (variant.stock < it.qty)
+      throw new ApiError(
+        400,
+        `Stock insufficient for ${variant.label}. Available: ${variant.stock}`
+      );
+  }
+
+  // all valid -> apply stock updates
+  for (const it of items) {
+    const product = await Product.findOne({
+      _id: it.productId,
+      "variants._id": it.variantId,
     });
-  } catch (err: any) {
-    logger.error(`getProductDetails | controller | ${err.message}`);
-    res.status(500).json({ success: false, message: err.message });
+
+    if (!product)
+      throw new ApiError(404, `Product or variant not found: ${it.productId}`);
+
+    const variant = product.variants.find(
+      (v) => v._id.toString() === it.variantId
+    );
+
+    if (!variant) throw new ApiError(404, `Variant not found: ${it.variantId}`);
+
+    await Product.updateOne(
+      { _id: it.productId, "variants._id": it.variantId },
+      {
+        $inc: { "variants.$.stock": -it.qty },
+        $set: {
+          "variants.$.isAvailable": variant.stock - it.qty > 0,
+        },
+      }
+    );
   }
-};
+  res.json({ message: "Stock decremented" });
+});
 
-export const decrementBulk = async (req: Request, res: Response) => {
-  try {
-    const { items } = req.body;
-    if (!Array.isArray(items) || items.length === 0)
-      return res.status(400).json({ message: "invalid items array" });
+export const increaseBulk = asyncHandler(async (req: Request, res: Response) => {
+  const { items } = req.body;
 
-    for (const it of items) {
-      const product = await Product.findOne({
-        _id: it.productId,
-        // for nested array ele
-        "variants._id": it.variantId,
-      });
-
-      if (!product)
-        throw new Error(`Product or variant not found: ${it.productId}`);
-
-      const variant = product.variants.find(
-        (v) => v._id.toString() === it.variantId
-      );
-
-      if (!variant) throw new Error(`Variant not found: ${it.variantId}`);
-
-      if (variant.stock < it.qty)
-        throw new Error(
-          `Stock insufficient for ${variant.label}. Available: ${variant.stock}`
-        );
-    }
-
-    // all valid -> apply stock updates
-    for (const it of items) {
-      const product = await Product.findOne({
-        _id: it.productId,
-        "variants._id": it.variantId,
-      });
-
-      if (!product)
-        throw new Error(`Product or variant not found: ${it.productId}`);
-
-      const variant = product.variants.find(
-        (v) => v._id.toString() === it.variantId
-      );
-
-      if (!variant) throw new Error(`Variant not found: ${it.variantId}`);
-
-      await Product.updateOne(
-        { _id: it.productId, "variants._id": it.variantId },
-        {
-          $inc: { "variants.$.stock": -it.qty },
-          $set: {
-            "variants.$.isAvailable": variant.stock - it.qty > 0,
-          },
-        }
-      );
-    }
-  } catch (err: any) {
-    console.error("decrementBulk:", err);
-    return res.status(400).json({ message: err.message });
+  if (!Array.isArray(items) || items.length === 0) {
+    throw new ApiError(400, "Invalid items array");
   }
-};
 
-export const increaseBulk = async (req: Request, res: Response) => {
-  try {
-    const { items } = req.body;
+  for (const it of items) {
+    const product = await Product.findOne({
+      _id: it.productId,
+      "variants._id": it.variantId,
+    });
 
-    if (!Array.isArray(items) || items.length === 0)
-      return res.status(400).json({ message: "Invalid items array" });
+    if (!product) continue;
 
-    for (const it of items) {
-      const product = await Product.findOne({
-        _id: it.productId,
-        "variants._id": it.variantId,
-      });
+    const variant = product.variants.find(
+      (v) => v._id.toString() === it.variantId
+    );
 
-      if (!product) continue;
+    if (!variant) continue;
 
-      const variant = product.variants.find(
-        (v) => v._id.toString() === it.variantId
-      );
-
-      if (!variant) continue;
-
-      await Product.updateOne(
-        { _id: it.productId, "variants._id": it.variantId },
-        {
-          $inc: { "variants.$.stock": it.qty },
-          $set: {
-            "variants.$.isAvailable": true,
-          },
-        }
-      );
-    }
-
-    return res.json({ success: true, message: "Stock increased" });
-  } catch (err: any) {
-    console.error("increaseBulk:", err);
-    return res.status(500).json({ message: err.message });
+    await Product.updateOne(
+      { _id: it.productId, "variants._id": it.variantId },
+      {
+        $inc: { "variants.$.stock": it.qty },
+        $set: {
+          "variants.$.isAvailable": true,
+        },
+      }
+    );
   }
-};
+
+  return res.json({ success: true, message: "Stock increased" });
+});
