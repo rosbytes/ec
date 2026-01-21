@@ -7,7 +7,7 @@ import MainLayout from "./layouts/MainLayout";
 import HomePage from "./pages/HomePage";
 import SearchPage from "./pages/SearchPage";
 import ProfileHomePage from "./pages/ProfileHomePage";
-import OrdersListingPage from "./pages/OrdersListingPage";
+import OrdersListingPage from "./pages/OrderHistoryPage";
 
 import ProductListingPage from "./pages/ProductListingPage";
 import ProductDetailPage from "./pages/ProductDetailPage";
@@ -21,14 +21,14 @@ import OrderStatusPage from "./pages/OrderStatusPage";
 import OrderDetailsPage from "./pages/OrderDetailsPage";
 
 import AuthPage from "./pages/AuthPage";
-import LocationPermissionPage from "./pages/LocationPermissionPage";
 import EditProfilePage from "./pages/EditProfilePage";
+import AddLocationPage from "./pages/AddLocationPage";
 
 export const appRoutes: RouteObject[] = [
  
   {
     path: "/location-permission",
-    element: <LocationPermissionPage />,
+    element: <AddLocationPage />,
   },
   {
     path: "/auth",

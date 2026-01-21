@@ -1,1 +1,37 @@
 @import "tailwindcss";
+
+
+
+
+@theme {
+
+  --font-sans: "Apercu Pro", ui-sans-serif, system-ui, sans-serif;
+
+  /* --- COLORS --- */
+  --color-primary: #000000;
+  --color-secondary: #FFFFFF;
+  --color-accent-01: #0A5445;
+  --color-accent-03: #FE5D27;
+  --color-border: #999999;
+  --color-alert-01: #FF0000;
+  --color-grey: #F2F3F2;
+
+  /* --- TEXT SIZES (Based on your "Auto" line-height) --- */
+  --text-text-1: 14px;
+  --text-text-2: 16px;
+  --text-text-3: 12px;
+
+  --text-h1: 16px;
+  --text-h2: 14px;
+  --text-h3: 12px;
+  --text-h4: 48px;
+
+  --text-b1: 16px;
+  --text-b2: 20px;
+  --text-b3: 14px;
+
+  --text-heading: 12px;
+  --text-subheading: 12px;
+  --text-cta-body: 12px;
+  --text-handwritten: 12px;
+}

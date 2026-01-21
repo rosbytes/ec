@@ -1,8 +1,10 @@
 import React from 'react'
-
+import DeliveryLocationHeader from '../components/address/DeliveryLocationHeader'
 const Header = () => {
   return (
-    <div>Header</div>
+    <div>
+      <DeliveryLocationHeader/>
+    </div>
   )
 }
 
