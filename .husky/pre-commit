@@ -1,0 +1,25 @@
+#!/usr/bin/env sh
+# . "$(dirname -- "$0")/_/husky.sh"
+
+# npm test
+
+#!/bin/sh
+. "$(dirname "$0")/_/husky.sh"
+
+# lint-staged run prettier write command
+echo "Running lint-staged..."
+pnpm lint-staged
+
+echo "Running frontend (fe) checks..."
+cd fe || exit
+pnpm lint
+# pnpm test
+cd ..
+
+# echo "Running backend (api) checks..."
+# cd api || exit
+# pnpm lint
+# pnpm test
+# cd ..
+
+echo "All checks passed ✅"
