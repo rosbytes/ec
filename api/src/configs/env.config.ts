@@ -20,10 +20,6 @@ const envSchema = z.object({
     TWILIO_ACCOUNT_SID: z.string().nonempty(),
     TWILIO_AUTH_TOKEN: z.string().nonempty(),
     TWILIO_VIRTUAL_NUMBER: z.string().nonempty(),
-
-    // GOOGLE_CLIENT_ID: z.string().nonempty(),
-    // GOOGLE_REDIRECT_URI: z.url(),
-    // GOOGLE_CLIENT_SECRET: z.string().nonempty(),
 })
 
 const createEnv = (env: NodeJS.ProcessEnv) => {
