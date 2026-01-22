@@ -1,15 +1,20 @@
 import { relations } from "drizzle-orm"
-import { pgTable, uuid, varchar, pgEnum } from "drizzle-orm/pg-core"
+import { pgTable, uuid, varchar } from "drizzle-orm/pg-core"
 import { timestamps } from "../columnHelper"
-
-export const roles = pgEnum("roles", ["consumer", "vendor", "admin"])
+import { userAddresses } from "./userAddresses"
+import { orders } from "./orders"
 
 export const users = pgTable("users", {
     id: uuid().primaryKey().defaultRandom(),
     name: varchar({ length: 255 }).notNull(),
-    phone: varchar({ length: 255 }).unique().notNull(),
-    role: roles().default("consumer"),
+
+    // phone length, ideally should be 15
+    phone: varchar({ length: 20 }).notNull().unique(),
+    email: varchar({ length: 255 }),
     ...timestamps,
 })
 
-export const usersRelations = relations(users, ({ many }) => ({}))
+export const usersRelations = relations(users, ({ many }) => ({
+    addresses: many(userAddresses),
+    orders: many(orders),
+}))
