@@ -1,11 +1,5 @@
 import { relations } from "drizzle-orm"
-import {
-    pgTable,
-    uuid,
-    decimal,
-    primaryKey,
-    integer,
-} from "drizzle-orm/pg-core"
+import { pgTable, uuid, decimal, primaryKey, integer } from "drizzle-orm/pg-core"
 import { timestamps } from "../columnHelper"
 import { vendors } from "./vendors"
 import { productVariants } from "./productVariants"
@@ -30,16 +24,13 @@ export const vendorVariantInventory = pgTable(
     (t) => [primaryKey({ columns: [t.vendorId, t.variantId] })],
 )
 
-export const vendorVariantInventoryRelations = relations(
-    vendorVariantInventory,
-    ({ one }) => ({
-        vendor: one(vendors, {
-            fields: [vendorVariantInventory.vendorId],
-            references: [vendors.id],
-        }),
-        variant: one(productVariants, {
-            fields: [vendorVariantInventory.vendorId],
-            references: [productVariants.id],
-        }),
+export const vendorVariantInventoryRelations = relations(vendorVariantInventory, ({ one }) => ({
+    vendor: one(vendors, {
+        fields: [vendorVariantInventory.vendorId],
+        references: [vendors.id],
     }),
-)
+    variant: one(productVariants, {
+        fields: [vendorVariantInventory.vendorId],
+        references: [productVariants.id],
+    }),
+}))
