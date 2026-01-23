@@ -48,9 +48,9 @@ export async function signUpVerify({ input, ctx }: { input: TSignUpVerifySchema;
         }
 
         // generate access token
-        // const accessToken = jwt.sign({ id: user.id }, env.USER_JWT_SECRET, {
-        //     expiresIn: env.USER_JWT_ACCESS_TOKEN_EXPIRY,
-        // })
+        const accessToken = jwt.sign({ id: user.id }, env.USER_JWT_SECRET, {
+            expiresIn: env.USER_JWT_ACCESS_TOKEN_EXPIRY as any,
+        })
 
         // generate otp
         //send otp

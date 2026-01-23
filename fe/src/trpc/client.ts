@@ -8,10 +8,12 @@ export const trpc = createTRPCReact<AppRouter>()
 export const trpcClient = trpc.createClient({
     links: [
         httpBatchLink({
-            url: "http://localhost:4000/trpc/", // backend tRPC endpoint
+            url: `${process.env.BACKEND_URL}/trpc/`, // backend tRPC endpoint
         }),
     ],
 })
 
 console.log(await trpcClient.greeting.query({ name: "Bhawani Singh" }))
-console.log(trpc.greeting.useQuery({ name: "Bhawani" }))
+// console.log(trpc.greeting.useQuery({ name: "Bhawani" }))
+const hello = await trpcClient.user.login.query({ name: "akgbytes", phone: "+919772868352" })
+console.log(hello)
