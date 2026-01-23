@@ -15,12 +15,9 @@ export const vendorLocations = pgTable("vendor_locations", {
     ...timestamps,
 })
 
-export const vendorLocationsRelations = relations(
-    vendorLocations,
-    ({ one }) => ({
-        vendor: one(vendors, {
-            fields: [vendorLocations.vendorId],
-            references: [vendors.id],
-        }),
+export const vendorLocationsRelations = relations(vendorLocations, ({ one }) => ({
+    vendor: one(vendors, {
+        fields: [vendorLocations.vendorId],
+        references: [vendors.id],
     }),
-)
+}))
