@@ -1,13 +1,4 @@
-import {
-    pgTable,
-    uuid,
-    decimal,
-    pgEnum,
-    boolean,
-    text,
-    timestamp,
-    varchar,
-} from "drizzle-orm/pg-core"
+import { pgTable, uuid, decimal, pgEnum, boolean, text, timestamp, varchar, index } from "drizzle-orm/pg-core"
 import { users } from "./users"
 import { vendors } from "./vendors"
 import { payments } from "./payments"
@@ -26,36 +17,40 @@ export const orderStatusEnum = pgEnum("order_status", [
     "refunded",
 ])
 
-export const orders = pgTable("orders", {
-    id: uuid().primaryKey().defaultRandom(),
-    orderNumber: varchar("order_number", { length: 50 }).notNull().unique(), // e.g., "ORD-2024-001234"
-    // reference to user and vendor
-    userId: uuid("user_id")
-        .notNull()
-        .references(() => users.id),
-    vendorId: uuid("vendor_id")
-        .notNull()
-        .references(() => vendors.id),
-    paymentId: uuid("payment_id").notNull(),
-    status: orderStatusEnum().notNull().default("pending"),
-    // Order amounts
-    subtotal: decimal("subtotal", { precision: 10, scale: 2 }).notNull(), // sum of all items
-    deliveryFee: decimal("delivery_fee", { precision: 10, scale: 2 })
-        .notNull()
-        .default("0"),
-    discount: decimal("discount", { precision: 10, scale: 2 })
-        .notNull()
-        .default("0"),
-    tax: decimal("tax", { precision: 10, scale: 2 }).notNull().default("0"),
-    total: decimal("total", { precision: 10, scale: 2 }).notNull(),
-    // Coupon/Promo
-    couponCode: varchar("coupon_code", { length: 50 }),
-    // Cancellation
-    isCancelled: boolean("is_cancelled").notNull().default(false),
-    cancellationReason: text("cancellation_reason"),
-    cancelledAt: timestamp("cancelled_at"),
-    ...timestamps,
-})
+export const orders = pgTable(
+    "orders",
+    {
+        id: uuid().primaryKey().defaultRandom(),
+        orderNumber: varchar("order_number", { length: 50 }).notNull().unique(), // e.g., "ORD-2024-001234"
+        // reference to user and vendor
+        userId: uuid("user_id")
+            .notNull()
+            .references(() => users.id),
+        vendorId: uuid("vendor_id")
+            .notNull()
+            .references(() => vendors.id),
+        paymentId: uuid("payment_id").notNull(),
+        status: orderStatusEnum().notNull().default("pending"),
+        // Order amounts
+        subtotal: decimal("subtotal", { precision: 10, scale: 2 }).notNull(), // sum of all items
+        deliveryFee: decimal("delivery_fee", { precision: 10, scale: 2 }).notNull().default("0"),
+        discount: decimal("discount", { precision: 10, scale: 2 }).notNull().default("0"),
+        tax: decimal("tax", { precision: 10, scale: 2 }).notNull().default("0"),
+        total: decimal("total", { precision: 10, scale: 2 }).notNull(),
+        // Coupon/Promo
+        couponCode: varchar("coupon_code", { length: 50 }),
+        // Cancellation
+        isCancelled: boolean("is_cancelled").notNull().default(false),
+        cancellationReason: text("cancellation_reason"),
+        cancelledAt: timestamp("cancelled_at"),
+        ...timestamps,
+    },
+    // (t) => [
+    //     index("order_user_idx").on(t.userId),
+    //     index("order_vendor_idx").on(t.vendorId),
+    //     index("order_payment_idx").on(t.paymentId),
+    // ],
+)
 
 export const orderRelations = relations(orders, ({ one, many }) => ({
     user: one(users, {

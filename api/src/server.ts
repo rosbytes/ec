@@ -1,6 +1,6 @@
 import express from "express"
-import * as trpcExpress from "@trpc/server/adapters/express"
-import { appRouter } from "./trpc"
+import { createExpressMiddleware } from "@trpc/server/adapters/express"
+import { appRouter, createContext } from "./trpc"
 import cors from "cors"
 import { connectCache, env, logger } from "./configs"
 
@@ -13,13 +13,7 @@ app.get("/", (req, res) => {
 })
 
 // tRPC endpoint
-app.use(
-    "/trpc",
-    trpcExpress.createExpressMiddleware({
-        router: appRouter,
-        createContext: () => ({}), // context for auth/db, empty for now
-    }),
-)
+app.use("/trpc", createExpressMiddleware({ router: appRouter, createContext }))
 
 app.listen(env.SERVER_PORT, async () => {
     logger.info(`Server is runnig on port: ${env.SERVER_PORT}, `)

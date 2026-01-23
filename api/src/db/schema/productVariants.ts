@@ -1,4 +1,4 @@
-import { uuid, pgTable, pgEnum, varchar, decimal } from "drizzle-orm/pg-core"
+import { uuid, pgTable, pgEnum, varchar, decimal, index } from "drizzle-orm/pg-core"
 import { products } from "./products"
 import { timestamps } from "../columnHelper"
 import { relations } from "drizzle-orm"
@@ -43,39 +43,40 @@ export const quantityUnitEnum = pgEnum("quantity_unit", [
     "tablet",
 ])
 
-export const productVariants = pgTable("product_variants", {
-    id: uuid().primaryKey().defaultRandom(),
-    productId: uuid("product_id")
-        .notNull()
-        .references(() => products.id),
-    // variants can have different name or labels as well
-    label: varchar({ length: 100 }).notNull(), // e.g. 500g, 1L
-    // Display quantity (what customer sees: "500 g", "1 l", "6 pc")
-    quantityValue: decimal("quantity_value", {
-        precision: 10,
-        scale: 2,
-    }).notNull(),
-    quantityUnit: quantityUnitEnum("quantity_unit").notNull(),
-    // Pricing already available in vendor inventory
-    // price: decimal("price", { precision: 10, scale: 2 }).notNull(),
-    // mrp: decimal("mrp", { precision: 10, scale: 2 }),
-    sku: varchar({ length: 100 }).unique(),
-    // can add primary variant if need like isPrimary
-    ...timestamps,
-})
-
-export const productVariantsRelations = relations(
-    productVariants,
-    ({ one, many }) => ({
-        // this might create problems later
-        product: one(products, {
-            fields: [productVariants.productId],
-            references: [products.id],
-        }),
-        officalImages: many(productVariantImages),
-        imagesByVendors: many(vendorVariantImages),
-        inventoryOfVendors: many(vendorVariantInventory),
-        // not so usefull
-        orderedItems: many(orderItems),
-    }),
+export const productVariants = pgTable(
+    "product_variants",
+    {
+        id: uuid().primaryKey().defaultRandom(),
+        productId: uuid("product_id")
+            .notNull()
+            .references(() => products.id),
+        // variants can have different name or labels as well
+        label: varchar({ length: 100 }).notNull(), // e.g. 500g, 1L
+        // Display quantity (what customer sees: "500 g", "1 l", "6 pc")
+        quantityValue: decimal("quantity_value", {
+            precision: 10,
+            scale: 2,
+        }).notNull(),
+        quantityUnit: quantityUnitEnum("quantity_unit").notNull(),
+        // Pricing already available in vendor inventory
+        // price: decimal("price", { precision: 10, scale: 2 }).notNull(),
+        // mrp: decimal("mrp", { precision: 10, scale: 2 }),
+        sku: varchar({ length: 100 }).unique(),
+        // can add primary variant if need like isPrimary
+        ...timestamps,
+    },
+    // (t) => [index("variant_product_idx").on(t.productId)],
 )
+
+export const productVariantsRelations = relations(productVariants, ({ one, many }) => ({
+    // this might create problems later
+    product: one(products, {
+        fields: [productVariants.productId],
+        references: [products.id],
+    }),
+    officalImages: many(productVariantImages),
+    imagesByVendors: many(vendorVariantImages),
+    inventoryOfVendors: many(vendorVariantInventory),
+    // not so usefull
+    orderedItems: many(orderItems),
+}))

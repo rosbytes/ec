@@ -16,25 +16,17 @@ const baseFormat = format.combine(
     format.splat(),
     format.metadata({ fillExcept: ["timestamp", "level", "message", "stack"] }),
 )
-const consoleFormat = format.printf(
-    ({ timestamp, level, message, metadata }) => {
-        const timeOnly = timestamp as string
-        const metaString =
-            metadata && Object.keys(metadata).length
-                ? `${JSON.stringify(metadata)}`
-                : " "
-        return `${timeOnly} [${level}] ${message} ${metaString}`
-    },
-)
+const consoleFormat = format.printf(({ timestamp, level, message, metadata }) => {
+    const timeOnly = timestamp as string
+    const metaString = metadata && Object.keys(metadata).length ? `${JSON.stringify(metadata)}` : " "
+    return `${timeOnly} [${level}] ${message} ${metaString}`
+})
 const uppercaseFormat = format((info) => {
     info.level = info.level.toUpperCase()
     return info
 })
 
-const loggerTransports: (
-    | transports.FileTransportInstance
-    | transports.ConsoleTransportInstance
-)[] = [
+const loggerTransports: (transports.FileTransportInstance | transports.ConsoleTransportInstance)[] = [
     new transports.File({
         filename: "log/app.log",
         format: format.json(),
@@ -44,11 +36,7 @@ const loggerTransports: (
 if (env.NODE_ENV === "development") {
     loggerTransports.push(
         new transports.Console({
-            format: format.combine(
-                uppercaseFormat(),
-                format.colorize(),
-                consoleFormat,
-            ),
+            format: format.combine(uppercaseFormat(), format.colorize(), consoleFormat),
         }),
     )
 }
@@ -57,11 +45,7 @@ export const logger = createLogger({
     level: "info",
     format: baseFormat,
     transports: loggerTransports,
-    exceptionHandlers: [
-        new transports.File({ filename: "log/exceptions.log" }),
-    ],
-    rejectionHandlers: [
-        new transports.File({ filename: "log/rejections.log" }),
-    ],
+    exceptionHandlers: [new transports.File({ filename: "log/exceptions.log" })],
+    rejectionHandlers: [new transports.File({ filename: "log/rejections.log" })],
     exitOnError: false,
 })
