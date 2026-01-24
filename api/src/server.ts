@@ -5,7 +5,11 @@ import cors from "cors"
 import { connectCache, env, logger } from "./configs"
 
 const app = express()
-app.use(cors())
+
+// TODO: enable trust proxy when using behind a proxy
+app.set("trust proxy", false)
+
+app.use(cors({ origin: env.FRONTEND_URL, credentials: true }))
 app.use(express.json())
 
 app.get("/", (req, res) => {
