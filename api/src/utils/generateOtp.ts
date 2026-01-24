@@ -1,4 +1,6 @@
-export default function generateOtp() {
-    const otp = "" + Math.floor(100000 + Math.random() * 900000)
+import { randomInt } from "crypto"
+
+export function generateOtp() {
+    const otp = "" + randomInt(100000, 1000000)
     return otp
 }

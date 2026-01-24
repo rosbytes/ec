@@ -29,6 +29,9 @@ importers:
       jsonwebtoken:
         specifier: ^9.0.3
         version: 9.0.3
+      libphonenumber-js:
+        specifier: ^1.12.35
+        version: 1.12.35
       postgres:
         specifier: ^3.4.8
         version: 3.4.8
@@ -977,6 +980,9 @@ packages:
 
   kuler@2.0.0:
     resolution: {integrity: sha512-Xq9nH7KlWZmXAtodXDDRE7vs6DU1gTU8zYDHDiWLSip45Egwq3plLHzPn27NgvzL2r1LMPC1vdqh98sQxtqj4A==}
+
+  libphonenumber-js@1.12.35:
+    resolution: {integrity: sha512-T/Cz6iLcsZdb5jDncDcUNhSAJ0VlSC9TnsqtBNdpkaAmy24/R1RhErtNWVWBrcUZKs9hSgaVsBkc7HxYnazIfw==}
 
   lodash.includes@4.3.0:
     resolution: {integrity: sha512-W3Bx6mdkRTGtlJISOvVD/lbqjTlPPUDTMnlXZFnVwi9NKJ6tiAk6LVdlhZMm17VZisqhKcgzpO5Wz91PCt5b0w==}
@@ -1942,6 +1948,8 @@ snapshots:
       safe-buffer: 5.2.1
 
   kuler@2.0.0: {}
+
+  libphonenumber-js@1.12.35: {}
 
   lodash.includes@4.3.0: {}
 
