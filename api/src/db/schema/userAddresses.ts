@@ -1,5 +1,5 @@
 import { relations } from "drizzle-orm"
-import { pgTable, uuid, varchar, geometry, index } from "drizzle-orm/pg-core"
+import { pgTable, uuid, varchar, geometry } from "drizzle-orm/pg-core"
 import { timestamps } from "../columnHelper"
 import { users } from "./users"
 
@@ -12,10 +12,12 @@ export const userAddresses = pgTable(
             .references(() => users.id),
 
         // phone length, ideally should be 15
-        phone: varchar({ length: 20 }).notNull().unique(),
+        phone: varchar({ length: 20 }).notNull(),
         label: varchar({ length: 100 }).notNull(),
         location: geometry({ type: "point", mode: "xy", srid: 4326 }).notNull(),
-        address: varchar({ length: 500 }),
+
+        // address length can decreased
+        address: varchar({ length: 500 }).notNull(),
         ...timestamps,
     },
     // (t) => [index("user_address_user_idx").on(t.userId)],
