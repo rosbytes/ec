@@ -1,6 +1,4 @@
 import { router, publicProcedure, userProcedure } from "../../trpc"
-// import { ZFindNearbyVendorsSchema } from "../discovery/discovery.schema"
-// import { addressRouter } from "./address.routes"
 import {
     ZLoginSchema,
     ZLoginVerifySchema,
@@ -9,7 +7,7 @@ import {
     ZSignUpVerifySchema,
 } from "./user.schema"
 
-export const userRouter = router({
+export const userAuthRouter = router({
     // user SignUp endpoit
     signUp: publicProcedure.input(ZSignUpSchema).mutation(async ({ input, ctx }) => {
         const { signUp } = await import("./user.controller")
