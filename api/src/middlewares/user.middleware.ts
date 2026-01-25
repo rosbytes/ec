@@ -1,4 +1,4 @@
-import { t } from "../trpc"
+import { t, Context } from "../trpc"
 import { TRPCError } from "@trpc/server"
 import { verifyUserAccessToken } from "../utils"
 
@@ -16,3 +16,5 @@ export const isUser = t.middleware(async ({ ctx, next }) => {
         throw new TRPCError({ code: "UNAUTHORIZED", message: "Invalid token" })
     }
 })
+
+export type UserContext = Context & { user: { id: string } }

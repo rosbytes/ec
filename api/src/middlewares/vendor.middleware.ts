@@ -1,6 +1,6 @@
 import { TRPCError } from "@trpc/server"
 import { verifyVendorAccessToken } from "../utils"
-import { t } from "../trpc"
+import { Context, t } from "../trpc"
 
 // Vendor Auth Middleware
 export const isVendor = t.middleware(async ({ ctx, next }) => {
@@ -16,3 +16,5 @@ export const isVendor = t.middleware(async ({ ctx, next }) => {
         throw new TRPCError({ code: "UNAUTHORIZED", message: "Invalid token" })
     }
 })
+
+export type VendorContext = Context & { vendor: { id: string } }
