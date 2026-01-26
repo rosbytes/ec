@@ -13,7 +13,7 @@ import type {
     TSignUpSchema,
     TSignUpVerifySchema,
 } from "./user.schema"
-import { Context } from "../../trpc"
+import type { Context } from "../../trpc"
 import { TRPCError } from "@trpc/server"
 import { findUserByPhone, saveUser, updateUser } from "./user.service"
 
@@ -31,7 +31,11 @@ export async function signUp({ input, ctx }: { input: TSignUpSchema; ctx: Contex
             await updateUser(input.phone, { firstName: input.firstName, lastName: input.lastName })
         } else {
             // save user to db
-            await saveUser({ firstName: input.firstName, lastName: input.lastName, phone: input.phone })
+            await saveUser({
+                firstName: input.firstName,
+                lastName: input.lastName,
+                phone: input.phone,
+            })
         }
 
         // generate otp
@@ -99,7 +103,10 @@ export async function login({ input, ctx }: { input: TLoginSchema; ctx: Context 
         // check if user already exists and verified then returns
         const userExists = await findUserByPhone({ phone: input.phone })
         if (!userExists || !userExists.verified) {
-            throw new TRPCError({ message: "User not available or not verified", code: "UNAUTHORIZED" })
+            throw new TRPCError({
+                message: "User not available or not verified",
+                code: "UNAUTHORIZED",
+            })
         }
 
         // generate otp

@@ -1,4 +1,4 @@
-import { router, publicProcedure, userProcedure } from "../../trpc"
+import { router, publicProcedure } from "../../trpc"
 import {
     ZLoginSchema,
     ZLoginVerifySchema,
@@ -37,13 +37,4 @@ export const userAuthRouter = router({
         const { refreshTokens } = await import("./user.controller")
         return refreshTokens({ input, ctx })
     }),
-
-    // user address
-    // address: addressRouter,
-
-    // nearby vendors
-    // nearbyVendors: userProcedure.input(ZFindNearbyVendorsSchema).query(async ({ input, ctx }) => {
-    //     const { findNearbyVendors } = await import("../discovery/discovery.controller")
-    //     return findNearbyVendors({ input, ctx })
-    // }),
 })

@@ -6,7 +6,7 @@
     "main": "server.js",
     "scripts": {
         "dev": "tsx watch src/server.ts",
-        "build": "tsc",
+        "build": "tsc -b --clean && tsc -b",
         "start": "node dist/src/server.js"
     },
     "keywords": [],

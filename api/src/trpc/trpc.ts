@@ -1,10 +1,7 @@
-import { initTRPC } from "@trpc/server"
-import { Context } from "./context"
+import { t } from "./core"
 import { tokenBucket } from "../utils"
 import { logger } from "../configs"
 import { isUser, isVendor } from "../middlewares"
-
-export const t = initTRPC.context<Context>().create()
 
 // tRPC Logger for request and response duration, and path of the request
 const trpcLogger = t.middleware(async ({ path, type, next }) => {

@@ -1,6 +1,6 @@
 import { db, userAddresses } from "../../db"
 import { eq, and } from "drizzle-orm"
-import { TCreateAddressSchema, TUpdateAddressSchema } from "./address.schema"
+import type { TCreateAddressSchema, TUpdateAddressSchema } from "./address.schema"
 
 // save user's address to db
 export const saveAddress = async (userId: string, data: TCreateAddressSchema) => {
