@@ -1,14 +1,40 @@
 import { router, publicProcedure } from "../../trpc"
-import { ZSignUpSchema, ZSignUpVerifySchema } from "./user.schema"
+import {
+    ZLoginSchema,
+    ZLoginVerifySchema,
+    ZRefreshTokenSchema,
+    ZSignUpSchema,
+    ZSignUpVerifySchema,
+} from "./user.schema"
 
-export const userRouter = router({
+export const userAuthRouter = router({
     // user SignUp endpoit
-    signUp: publicProcedure.input(ZSignUpSchema).query(async ({ input, ctx }) => {
+    signUp: publicProcedure.input(ZSignUpSchema).mutation(async ({ input, ctx }) => {
         const { signUp } = await import("./user.controller")
         return signUp({ input, ctx })
     }),
-    signUpVerify: publicProcedure.input(ZSignUpVerifySchema).query(async ({ input, ctx }) => {
+
+    // verify sign up
+    signUpVerify: publicProcedure.input(ZSignUpVerifySchema).mutation(async ({ input, ctx }) => {
         const { signUpVerify } = await import("./user.controller")
         return signUpVerify({ input, ctx })
+    }),
+
+    // login
+    login: publicProcedure.input(ZLoginSchema).mutation(async ({ input, ctx }) => {
+        const { login } = await import("./user.controller")
+        return login({ input, ctx })
+    }),
+
+    // verify login
+    loginVerify: publicProcedure.input(ZLoginVerifySchema).mutation(async ({ input, ctx }) => {
+        const { loginVerify } = await import("./user.controller")
+        return loginVerify({ input, ctx })
+    }),
+
+    // refresh tokens
+    refreshTokens: publicProcedure.input(ZRefreshTokenSchema).mutation(async ({ input, ctx }) => {
+        const { refreshTokens } = await import("./user.controller")
+        return refreshTokens({ input, ctx })
     }),
 })

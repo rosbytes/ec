@@ -11,11 +11,22 @@ const envSchema = z.object({
     DATABASE_URL: z.url(),
     REDIS_URL: z.url(),
 
-    SLAT_ROUNDS: z.coerce.number<number>(),
-    USER_JWT_SECRET: z.string().nonempty(),
+    // Salt Only needed when hashing something like password etc.
+    SALT_ROUNDS: z.coerce.number<number>(),
+
+    //  User Token Credentials
+    USER_JWT_ACCESS_TOKEN_SECRET: z.string().nonempty(),
     USER_JWT_ACCESS_TOKEN_EXPIRY: z.string().nonempty(),
+    USER_JWT_REFRESH_TOKEN_SECRET: z.string().nonempty(),
     USER_JWT_REFRESH_TOKEN_EXPIRY: z.string().nonempty(),
 
+    //  Vendor Token Credentials
+    VENDOR_JWT_ACCESS_TOKEN_SECRET: z.string().nonempty(),
+    VENDOR_JWT_ACCESS_TOKEN_EXPIRY: z.string().nonempty(),
+    VENDOR_JWT_REFRESH_TOKEN_SECRET: z.string().nonempty(),
+    VENDOR_JWT_REFRESH_TOKEN_EXPIRY: z.string().nonempty(),
+
+    // Twilio Credentials
     TWILIO_ACCOUNT_SID: z.string().nonempty(),
     TWILIO_AUTH_TOKEN: z.string().nonempty(),
     TWILIO_VIRTUAL_NUMBER: z.string().nonempty(),

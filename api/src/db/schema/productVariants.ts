@@ -1,4 +1,4 @@
-import { uuid, pgTable, pgEnum, varchar, decimal, index } from "drizzle-orm/pg-core"
+import { uuid, pgTable, pgEnum, varchar, decimal } from "drizzle-orm/pg-core"
 import { products } from "./products"
 import { timestamps } from "../columnHelper"
 import { relations } from "drizzle-orm"
