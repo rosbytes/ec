@@ -1,4 +1,14 @@
-import { pgTable, uuid, decimal, pgEnum, text, timestamp, varchar, json, integer, index } from "drizzle-orm/pg-core"
+import {
+    pgTable,
+    uuid,
+    decimal,
+    pgEnum,
+    text,
+    timestamp,
+    varchar,
+    json,
+    integer,
+} from "drizzle-orm/pg-core"
 import { timestamps } from "../columnHelper"
 import { orders } from "./orders"
 import { relations } from "drizzle-orm"
@@ -107,7 +117,7 @@ export const payments = pgTable(
     // (t) => [index("payment_order_idx").on(t.orderId)],
 )
 
-export const paymentRelations = relations(payments, ({ one, many }) => ({
+export const paymentRelations = relations(payments, ({ one }) => ({
     order: one(orders, {
         fields: [payments.orderId],
         references: [orders.id],
