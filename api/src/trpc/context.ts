@@ -1,4 +1,4 @@
-import { CreateExpressContextOptions } from "@trpc/server/adapters/express"
+import type { CreateExpressContextOptions } from "@trpc/server/adapters/express"
 import { db } from "../db/db"
 
 import { type Request, type Response } from "express"

@@ -1,4 +1,4 @@
-import { userAuthRouter, userAddressRouter } from "../modules/user"
+import { userAuthRouter, userAddressRouter, cartRouter } from "../modules/user"
 import { publicProcedure, router } from "./trpc"
 import { z } from "zod"
 
@@ -7,6 +7,7 @@ export const appRouter = router({
     user: {
         auth: userAuthRouter,
         address: userAddressRouter,
+        cart: cartRouter,
     },
     // initial setup testing procedure/endpoint
     greeting: publicProcedure.input(z.object({ name: z.string() })).query(({ input }) => {

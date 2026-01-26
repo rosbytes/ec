@@ -1,5 +1,5 @@
 import { relations } from "drizzle-orm"
-import { pgTable, uuid, varchar, index } from "drizzle-orm/pg-core"
+import { pgTable, uuid, varchar } from "drizzle-orm/pg-core"
 import { timestamps } from "../columnHelper"
 import { categories } from "./categories"
 import { productVariants } from "./productVariants"

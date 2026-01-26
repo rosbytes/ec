@@ -18,4 +18,4 @@ export {
 } from "./tokens"
 
 // Cart exports
-export { getCartKey } from "./getCart"
+export { getCartKey, parseField, constructField } from "./cartUtils"

@@ -1,4 +1,4 @@
-import { pgTable, uuid, varchar, boolean, index } from "drizzle-orm/pg-core"
+import { pgTable, uuid, varchar, boolean } from "drizzle-orm/pg-core"
 import { timestamps } from "../columnHelper"
 import { productVariants } from "./productVariants"
 import { relations } from "drizzle-orm"
