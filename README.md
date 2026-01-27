@@ -7,3 +7,7 @@ users like consumer, vendor, support, {admin => just for overseeing}
 
 - [ review cart and address logic ]
 - [ discovery module ]
+
+Db has temp visitor called boardUser =>
+in future its responsibilities should be offloaded to mandi
+and mandi may has a central authority to monitory or controll them.
