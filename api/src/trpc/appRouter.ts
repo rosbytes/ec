@@ -1,5 +1,11 @@
-import { userAuthRouter, userAddressRouter, cartRouter } from "../modules/user"
-import { publicProcedure, router } from "./trpc"
+import {
+    userAuthRouter,
+    userAddressRouter,
+    cartRouter,
+    boardRouter,
+    userInventoryRouter,
+} from "../modules"
+import { publicProcedure, router } from "./globals"
 import { z } from "zod"
 
 // Define a simple router
@@ -8,7 +14,9 @@ export const appRouter = router({
         auth: userAuthRouter,
         address: userAddressRouter,
         cart: cartRouter,
+        inventory: userInventoryRouter,
     },
+    board: boardRouter,
     // initial setup testing procedure/endpoint
     greeting: publicProcedure.input(z.object({ name: z.string() })).query(({ input }) => {
         return `Hello, ${input.name}! Welcome to tRPC`
