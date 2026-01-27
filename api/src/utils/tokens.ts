@@ -50,3 +50,28 @@ export const verifyVendorAccessToken = (token: string) => {
 export const verifyVendorRefreshToken = (token: string) => {
     return jwt.verify(token, env.VENDOR_JWT_REFRESH_TOKEN_SECRET) as { id: string }
 }
+
+/*
+ *
+ *   Board Access & Refresh Token
+ *
+ * */
+export const generateBoardAccessToken = ({ id }: { id: string }) => {
+    return jwt.sign({ id }, env.BOARD_JWT_ACCESS_TOKEN_SECRET, {
+        expiresIn: env.BOARD_JWT_ACCESS_TOKEN_EXPIRY as any,
+    })
+}
+
+export const generateBoardRefreshToken = ({ id }: { id: string }) => {
+    return jwt.sign({ id }, env.BOARD_JWT_REFRESH_TOKEN_SECRET, {
+        expiresIn: env.BOARD_JWT_REFRESH_TOKEN_EXPIRY as any,
+    })
+}
+
+export const verifyBoardAccessToken = (token: string) => {
+    return jwt.verify(token, env.BOARD_JWT_ACCESS_TOKEN_SECRET) as { id: string }
+}
+
+export const verifyBoardRefreshToken = (token: string) => {
+    return jwt.verify(token, env.BOARD_JWT_REFRESH_TOKEN_SECRET) as { id: string }
+}
