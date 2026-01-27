@@ -13,6 +13,7 @@ export const vendors = pgTable("vendors", {
     name: varchar({ length: 255 }).notNull(),
     // phone should of length 15
     phone: varchar({ length: 20 }).unique().notNull(),
+    verified: boolean().default(false).notNull(),
     email: varchar({ length: 255 }),
 
     // opens_at and closes_at should be the time or other data type
