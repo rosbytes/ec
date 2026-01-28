@@ -1,6 +1,11 @@
-import z from "zod"
 import { router, publicProcedure } from "../../trpc"
-import { ZLoginSchema, ZLoginVerifySchema, ZSignUpSchema, ZSignUpVerifySchema } from "./user.schema"
+import {
+    ZLoginSchema,
+    ZLoginVerifySchema,
+    ZRefreshTokenSchema,
+    ZSignUpSchema,
+    ZSignUpVerifySchema,
+} from "./user.schema"
 
 export const userAuthRouter = router({
     // user SignUp endpoit
@@ -28,14 +33,8 @@ export const userAuthRouter = router({
     }),
 
     // refresh tokens
-    refreshTokens: publicProcedure.input(z.void()).mutation(async ({ ctx }) => {
+    refreshTokens: publicProcedure.input(ZRefreshTokenSchema).mutation(async ({ input, ctx }) => {
         const { refreshTokens } = await import("./user.controller")
-        return refreshTokens({ ctx })
-    }),
-
-    // logout
-    logout: publicProcedure.input(z.void()).mutation(async ({ ctx }) => {
-        const { logout } = await import("./user.controller")
-        return logout({ ctx })
+        return refreshTokens({ input, ctx })
     }),
 })
