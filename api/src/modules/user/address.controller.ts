@@ -10,11 +10,12 @@ import {
 } from "./address.service"
 import { logger } from "../../configs"
 import { UserContext } from "../../middlewares"
+import { rateLimit } from "../../utils"
 
 // create userAddress
-// TODO: can implement some address caching and rate Limitting
 export async function addAddress({ input, ctx }: { input: TCreateAddressSchema; ctx: UserContext }) {
     try {
+        await rateLimit(`rateLimit:address:add:${ctx.user.id}`, 10, 60)
         const addressCount = await getAddressCountByUserId(ctx.user.id)
         if (addressCount >= 10) {
             throw new TRPCError({ message: "You can only have up to 10 saved addresses", code: "BAD_REQUEST" })
@@ -29,9 +30,9 @@ export async function addAddress({ input, ctx }: { input: TCreateAddressSchema; 
 }
 
 // getAll userAddress
-// TODO: can implement some address caching and rate Limitting
 export async function listAddresses({ ctx }: { ctx: UserContext }) {
     try {
+        await rateLimit(`rateLimit:address:list:${ctx.user.id}`, 20, 60)
         const addresses = await getAddressesByUserId(ctx.user.id)
         return { success: true, addresses }
     } catch (error) {
@@ -42,9 +43,9 @@ export async function listAddresses({ ctx }: { ctx: UserContext }) {
 }
 
 // delete
-// TODO: can implement some address caching and rate Limitting
 export async function removeAddress({ input, ctx }: { input: TDeleteAddressSchema; ctx: UserContext }) {
     try {
+        await rateLimit(`rateLimit:address:remove:${ctx.user.id}`, 10, 60)
         const deleted = await deleteAddressById(ctx.user.id, input.id)
         if (!deleted) {
             throw new TRPCError({ message: "Address not found or unauthorized", code: "NOT_FOUND" })
@@ -58,9 +59,9 @@ export async function removeAddress({ input, ctx }: { input: TDeleteAddressSchem
 }
 
 // update
-// TODO: can implement some address caching and rate Limitting
 export async function updateAddress({ input, ctx }: { input: TUpdateAddressSchema; ctx: UserContext }) {
     try {
+        await rateLimit(`rateLimit:address:update:${ctx.user.id}`, 10, 60)
         const updated = await updateAddressById(ctx.user.id, input)
         if (!updated) {
             throw new TRPCError({ message: "Address not found or unauthorized", code: "NOT_FOUND" })

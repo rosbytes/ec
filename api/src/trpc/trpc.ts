@@ -1,10 +1,7 @@
-import { initTRPC } from "@trpc/server"
-import { Context } from "./context"
 import { tokenBucket } from "../utils"
 import { logger } from "../configs"
 import { isUser, isVendor } from "../middlewares"
-
-export const t = initTRPC.context<Context>().create()
+import { t } from "./core"
 
 // tRPC Logger for request and response duration, and path of the request
 const trpcLogger = t.middleware(async ({ path, type, next }) => {
@@ -15,7 +12,7 @@ const trpcLogger = t.middleware(async ({ path, type, next }) => {
     return result
 })
 
-// TODO: Review this token Bucket limitter, It is written by AI.
+// Global rate limiter using Token Bucket algorithm
 const globalRateLimit = t.middleware(async ({ ctx, next }) => {
     // Global limit: 50 capacity, refill 25 tokens every 30 seconds
     await tokenBucket(`rateLimit:global:ip:${ctx.req.ip}`, 50, 25, 30)
