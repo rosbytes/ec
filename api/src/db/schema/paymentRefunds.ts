@@ -1,11 +1,26 @@
-import { uuid, pgTable, integer, varchar, decimal, text, pgEnum, json, timestamp, index } from "drizzle-orm/pg-core"
+import {
+    uuid,
+    pgTable,
+    integer,
+    varchar,
+    decimal,
+    text,
+    pgEnum,
+    json,
+    timestamp,
+} from "drizzle-orm/pg-core"
 import { payments } from "./payments"
 import { orders } from "./orders"
 import { timestamps } from "../columnHelper"
 import { relations } from "drizzle-orm"
 
 // Refund status enum
-export const refundStatusEnum = pgEnum("refund_status", ["pending", "processing", "completed", "failed"])
+export const refundStatusEnum = pgEnum("refund_status", [
+    "pending",
+    "processing",
+    "completed",
+    "failed",
+])
 
 // Payment refunds table
 export const paymentRefunds = pgTable(

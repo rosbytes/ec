@@ -1,6 +1,7 @@
 import { TRPCError } from "@trpc/server"
 import { verifyVendorAccessToken } from "../utils"
-import { Context, t } from "../trpc"
+import { t } from "../trpc/trpc"
+import type { Context } from "../trpc"
 
 // Vendor Auth Middleware
 export const isVendor = t.middleware(async ({ ctx, next }) => {

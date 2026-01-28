@@ -1,4 +1,5 @@
-export { router, publicProcedure, userProcedure, vendorProcedure, t } from "./trpc"
+export { router, publicProcedure, userProcedure, vendorProcedure, boardProcedure } from "./globals"
+export { t } from "./trpc"
 
 // appRouter exports
 export { appRouter } from "./appRouter"

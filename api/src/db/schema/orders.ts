@@ -1,4 +1,13 @@
-import { pgTable, uuid, decimal, pgEnum, boolean, text, timestamp, varchar, index } from "drizzle-orm/pg-core"
+import {
+    pgTable,
+    uuid,
+    decimal,
+    pgEnum,
+    boolean,
+    text,
+    timestamp,
+    varchar,
+} from "drizzle-orm/pg-core"
 import { users } from "./users"
 import { vendors } from "./vendors"
 import { payments } from "./payments"

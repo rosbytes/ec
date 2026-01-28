@@ -26,6 +26,12 @@ const envSchema = z.object({
     VENDOR_JWT_REFRESH_TOKEN_SECRET: z.string().nonempty(),
     VENDOR_JWT_REFRESH_TOKEN_EXPIRY: z.string().nonempty(),
 
+    //  Board Token Credentials
+    BOARD_JWT_ACCESS_TOKEN_SECRET: z.string().nonempty(),
+    BOARD_JWT_ACCESS_TOKEN_EXPIRY: z.string().nonempty(),
+    BOARD_JWT_REFRESH_TOKEN_SECRET: z.string().nonempty(),
+    BOARD_JWT_REFRESH_TOKEN_EXPIRY: z.string().nonempty(),
+
     // Twilio Credentials
     TWILIO_ACCOUNT_SID: z.string().nonempty(),
     TWILIO_AUTH_TOKEN: z.string().nonempty(),

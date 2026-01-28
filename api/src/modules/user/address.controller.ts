@@ -1,6 +1,9 @@
-import { Context } from "../../trpc"
 import { TRPCError } from "@trpc/server"
-import { TCreateAddressSchema, TDeleteAddressSchema, TUpdateAddressSchema } from "./address.schema"
+import type {
+    TCreateAddressSchema,
+    TDeleteAddressSchema,
+    TUpdateAddressSchema,
+} from "./address.schema"
 import {
     deleteAddressById,
     getAddressCountByUserId,
@@ -9,16 +12,25 @@ import {
     updateAddressById,
 } from "./address.service"
 import { logger } from "../../configs"
-import { UserContext } from "../../middlewares"
-import { rateLimit } from "../../utils"
+import type { UserContext } from "../../middlewares"
 
 // create userAddress
-export async function addAddress({ input, ctx }: { input: TCreateAddressSchema; ctx: UserContext }) {
+// TODO: can implement some address caching and rate Limitting
+export async function addAddress({
+    input,
+    ctx,
+}: {
+    input: TCreateAddressSchema
+    ctx: UserContext
+}) {
     try {
         await rateLimit(`rateLimit:address:add:${ctx.user.id}`, 10, 60)
         const addressCount = await getAddressCountByUserId(ctx.user.id)
         if (addressCount >= 10) {
-            throw new TRPCError({ message: "You can only have up to 10 saved addresses", code: "BAD_REQUEST" })
+            throw new TRPCError({
+                message: "You can only have up to 10 saved addresses",
+                code: "BAD_REQUEST",
+            })
         }
         const address = await saveAddress(ctx.user.id, input)
         return { success: true, message: "Address added successfully", address }
@@ -43,7 +55,14 @@ export async function listAddresses({ ctx }: { ctx: UserContext }) {
 }
 
 // delete
-export async function removeAddress({ input, ctx }: { input: TDeleteAddressSchema; ctx: UserContext }) {
+// TODO: can implement some address caching and rate Limitting
+export async function removeAddress({
+    input,
+    ctx,
+}: {
+    input: TDeleteAddressSchema
+    ctx: UserContext
+}) {
     try {
         await rateLimit(`rateLimit:address:remove:${ctx.user.id}`, 10, 60)
         const deleted = await deleteAddressById(ctx.user.id, input.id)
@@ -59,7 +78,14 @@ export async function removeAddress({ input, ctx }: { input: TDeleteAddressSchem
 }
 
 // update
-export async function updateAddress({ input, ctx }: { input: TUpdateAddressSchema; ctx: UserContext }) {
+// TODO: can implement some address caching and rate Limitting
+export async function updateAddress({
+    input,
+    ctx,
+}: {
+    input: TUpdateAddressSchema
+    ctx: UserContext
+}) {
     try {
         await rateLimit(`rateLimit:address:update:${ctx.user.id}`, 10, 60)
         const updated = await updateAddressById(ctx.user.id, input)

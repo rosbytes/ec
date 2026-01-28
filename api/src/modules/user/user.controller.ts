@@ -9,11 +9,10 @@ import { cache, env, logger, sendOtp } from "../../configs"
 import type {
     TLoginSchema,
     TLoginVerifySchema,
-    TRefreshTokenSchema,
     TSignUpSchema,
     TSignUpVerifySchema,
 } from "./user.schema"
-import { Context } from "../../trpc"
+import type { Context } from "../../trpc"
 import { TRPCError } from "@trpc/server"
 import { findUserByPhone, saveUser, updateUser } from "./user.service"
 
@@ -31,7 +30,11 @@ export async function signUp({ input, ctx }: { input: TSignUpSchema; ctx: Contex
             await updateUser(input.phone, { firstName: input.firstName, lastName: input.lastName })
         } else {
             // save user to db
-            await saveUser({ firstName: input.firstName, lastName: input.lastName, phone: input.phone })
+            await saveUser({
+                firstName: input.firstName,
+                lastName: input.lastName,
+                phone: input.phone,
+            })
         }
 
         // generate otp
@@ -99,7 +102,10 @@ export async function login({ input, ctx }: { input: TLoginSchema; ctx: Context 
         // check if user already exists and verified then returns
         const userExists = await findUserByPhone({ phone: input.phone })
         if (!userExists || !userExists.verified) {
-            throw new TRPCError({ message: "User not available or not verified", code: "UNAUTHORIZED" })
+            throw new TRPCError({
+                message: "User not available or not verified",
+                code: "UNAUTHORIZED",
+            })
         }
 
         // generate otp
@@ -156,21 +162,24 @@ export async function loginVerify({ input, ctx }: { input: TLoginVerifySchema; c
     }
 }
 
-export async function refreshTokens({ input, ctx }: { input: TRefreshTokenSchema; ctx: Context }) {
+// get refresh token from headers not input
+export async function refreshTokens({ ctx }: { ctx: Context }) {
     try {
         await rateLimit(`rateLimit:refreshToken:ip:${ctx.req.ip}`, 10, 60)
 
         // 1. Verify Refresh Token JWT
         let decoded: { id: string }
+        const refreshTokenFromHeaders = ctx.req.headers["x-refresh-token"] as string
+
         try {
-            decoded = verifyUserRefreshToken(input.refreshToken)
+            decoded = verifyUserRefreshToken(refreshTokenFromHeaders)
         } catch (err) {
             throw new TRPCError({ code: "UNAUTHORIZED", message: "Invalid refresh token" })
         }
 
         // 2. Check Redis for this user's token
         const storedToken = await cache.get(`refreshToken:${decoded.id}`)
-        if (storedToken !== input.refreshToken) {
+        if (storedToken !== refreshTokenFromHeaders) {
             throw new TRPCError({ code: "UNAUTHORIZED", message: "Token expired or revoked" })
         }
 
@@ -197,4 +206,21 @@ export async function refreshTokens({ input, ctx }: { input: TRefreshTokenSchema
         if (error instanceof TRPCError) throw error
         throw new TRPCError({ message: "Something Went Wrong", code: "INTERNAL_SERVER_ERROR" })
     }
+}
+
+export async function logout({ ctx }: { ctx: Context }) {
+    const refreshToken = ctx.req.headers["x-refresh-token"] as string
+    try {
+        if (refreshToken) {
+            const decoded = verifyUserRefreshToken(refreshToken)
+            cache.expire(`refreshToken:${decoded.id}`, 0)
+        }
+    } catch (err) {
+        logger.error("Logout attempt without refresh token", err)
+    }
+
+    ctx.res.removeHeader("Authorization")
+    ctx.res.removeHeader("x-refresh-token")
+
+    return { success: true, message: "Logged out successfully" }
 }

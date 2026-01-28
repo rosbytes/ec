@@ -1,4 +1,5 @@
-import { t, Context } from "../trpc"
+import { t } from "../trpc/trpc"
+import type { Context } from "../trpc"
 import { TRPCError } from "@trpc/server"
 import { verifyUserAccessToken } from "../utils"
 
