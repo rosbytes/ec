@@ -9,6 +9,7 @@ import { cache, env, logger, sendOtp } from "../../configs"
 import type {
     TLoginSchema,
     TLoginVerifySchema,
+    TRefreshTokenSchema,
     TSignUpSchema,
     TSignUpVerifySchema,
 } from "./user.schema"
@@ -162,24 +163,21 @@ export async function loginVerify({ input, ctx }: { input: TLoginVerifySchema; c
     }
 }
 
-// get refresh token from headers not input
-export async function refreshTokens({ ctx }: { ctx: Context }) {
+export async function refreshTokens({ input, ctx }: { input: TRefreshTokenSchema; ctx: Context }) {
     try {
         await rateLimit(`rateLimit:refreshToken:ip:${ctx.req.ip}`, 10, 60)
 
         // 1. Verify Refresh Token JWT
         let decoded: { id: string }
-        const refreshTokenFromHeaders = ctx.req.headers["x-refresh-token"] as string
-
         try {
-            decoded = verifyUserRefreshToken(refreshTokenFromHeaders)
+            decoded = verifyUserRefreshToken(input.refreshToken)
         } catch (err) {
             throw new TRPCError({ code: "UNAUTHORIZED", message: "Invalid refresh token" })
         }
 
         // 2. Check Redis for this user's token
         const storedToken = await cache.get(`refreshToken:${decoded.id}`)
-        if (storedToken !== refreshTokenFromHeaders) {
+        if (storedToken !== input.refreshToken) {
             throw new TRPCError({ code: "UNAUTHORIZED", message: "Token expired or revoked" })
         }
 
@@ -206,21 +204,4 @@ export async function refreshTokens({ ctx }: { ctx: Context }) {
         if (error instanceof TRPCError) throw error
         throw new TRPCError({ message: "Something Went Wrong", code: "INTERNAL_SERVER_ERROR" })
     }
-}
-
-export async function logout({ ctx }: { ctx: Context }) {
-    const refreshToken = ctx.req.headers["x-refresh-token"] as string
-    try {
-        if (refreshToken) {
-            const decoded = verifyUserRefreshToken(refreshToken)
-            cache.expire(`refreshToken:${decoded.id}`, 0)
-        }
-    } catch (err) {
-        logger.error("Logout attempt without refresh token", err)
-    }
-
-    ctx.res.removeHeader("Authorization")
-    ctx.res.removeHeader("x-refresh-token")
-
-    return { success: true, message: "Logged out successfully" }
 }
