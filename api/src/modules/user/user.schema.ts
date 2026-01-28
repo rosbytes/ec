@@ -52,8 +52,3 @@ export type TLoginVerifySchema = z.infer<typeof ZLoginVerifySchema>
  * RefreshToken Schema
  *
  * */
-export const ZRefreshTokenSchema = z.object({
-    refreshToken: z.string().nonempty(),
-})
-
-export type TRefreshTokenSchema = z.infer<typeof ZRefreshTokenSchema>
