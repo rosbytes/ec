@@ -24,6 +24,7 @@ export async function addAddress({
     ctx: UserContext
 }) {
     try {
+        await rateLimit(`rateLimit:address:add:${ctx.user.id}`, 10, 60)
         const addressCount = await getAddressCountByUserId(ctx.user.id)
         if (addressCount >= 10) {
             throw new TRPCError({
@@ -41,9 +42,9 @@ export async function addAddress({
 }
 
 // getAll userAddress
-// TODO: can implement some address caching and rate Limitting
 export async function listAddresses({ ctx }: { ctx: UserContext }) {
     try {
+        await rateLimit(`rateLimit:address:list:${ctx.user.id}`, 20, 60)
         const addresses = await getAddressesByUserId(ctx.user.id)
         return { success: true, addresses }
     } catch (error) {
@@ -63,6 +64,7 @@ export async function removeAddress({
     ctx: UserContext
 }) {
     try {
+        await rateLimit(`rateLimit:address:remove:${ctx.user.id}`, 10, 60)
         const deleted = await deleteAddressById(ctx.user.id, input.id)
         if (!deleted) {
             throw new TRPCError({ message: "Address not found or unauthorized", code: "NOT_FOUND" })
@@ -85,6 +87,7 @@ export async function updateAddress({
     ctx: UserContext
 }) {
     try {
+        await rateLimit(`rateLimit:address:update:${ctx.user.id}`, 10, 60)
         const updated = await updateAddressById(ctx.user.id, input)
         if (!updated) {
             throw new TRPCError({ message: "Address not found or unauthorized", code: "NOT_FOUND" })
