@@ -30,7 +30,7 @@ export const vendorVariantInventoryRelations = relations(vendorVariantInventory,
         references: [vendors.id],
     }),
     variant: one(productVariants, {
-        fields: [vendorVariantInventory.vendorId],
+        fields: [vendorVariantInventory.variantId],
         references: [productVariants.id],
     }),
 }))

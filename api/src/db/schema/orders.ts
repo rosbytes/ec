@@ -48,6 +48,8 @@ export const orders = pgTable(
         total: decimal("total", { precision: 10, scale: 2 }).notNull(),
         // Coupon/Promo
         couponCode: varchar("coupon_code", { length: 50 }),
+        // Delivery address snapshot (stored as JSON for historical accuracy)
+        deliveryAddress: text("delivery_address").notNull(),
         // Cancellation
         isCancelled: boolean("is_cancelled").notNull().default(false),
         cancellationReason: text("cancellation_reason"),
