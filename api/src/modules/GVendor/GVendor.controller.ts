@@ -12,10 +12,10 @@ import type {
     TRefreshTokenSchema,
     TSignUpSchema,
     TSignUpVerifySchema,
-} from "./board.schema"
+} from "./GVendor.schema"
 import type { Context } from "../../trpc"
 import { TRPCError } from "@trpc/server"
-import { findBoardByPhone, saveBoard, updateBoard } from "./board.service"
+import { findBoardByPhone, saveBoard, updateBoard } from "./GVendor.service"
 
 export async function signUp({ input, ctx }: { input: TSignUpSchema; ctx: Context }) {
     try {

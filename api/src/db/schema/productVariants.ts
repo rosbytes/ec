@@ -59,8 +59,8 @@ export const productVariants = pgTable(
         }).notNull(),
         quantityUnit: quantityUnitEnum("quantity_unit").notNull(),
         // Pricing already available in vendor inventory
-        // price: decimal("price", { precision: 10, scale: 2 }).notNull(),
-        // mrp: decimal("mrp", { precision: 10, scale: 2 }),
+        price: decimal("price", { precision: 10, scale: 2 }).notNull(),
+        mrp: decimal("mrp", { precision: 10, scale: 2 }),
         sku: varchar({ length: 100 }).unique(),
         // can add primary variant if need like isPrimary
         ...timestamps,

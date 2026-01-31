@@ -1,5 +1,5 @@
 import { db, products, productVariants, productVariantImages } from "../../db"
-import type { TCreateProductSchema } from "./boardProduct.schema"
+import type { TCreateProductSchema } from "./product.schema"
 
 /**
  * Simple slugify function
