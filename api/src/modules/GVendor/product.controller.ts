@@ -1,7 +1,7 @@
 import { TRPCError } from "@trpc/server"
 import { logger } from "../../configs"
-import type { TCreateProductSchema } from "./boardProduct.schema"
-import { createGlobalProduct as createProductService } from "./boardProduct.service"
+import type { TCreateProductSchema } from "./product.schema"
+import { createGlobalProduct as createProductService } from "./product.service"
 
 export async function createGlobalProduct({ input }: { input: TCreateProductSchema }) {
     try {
