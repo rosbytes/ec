@@ -1,0 +1,135 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* Republic of Sabjiwala - Vendor Dashboard Design System
+   Green-themed professional dashboard with clean aesthetics
+*/
+
+@layer base {
+  :root {
+    /* Core brand colors - Green theme */
+    --background: 0 0% 98%;
+    --foreground: 0 0% 12%;
+
+    --card: 0 0% 100%;
+    --card-foreground: 0 0% 12%;
+
+    --popover: 0 0% 100%;
+    --popover-foreground: 0 0% 12%;
+
+    /* Primary green - matching the logo */
+    --primary: 145 63% 32%;
+    --primary-foreground: 0 0% 100%;
+
+    --secondary: 145 30% 95%;
+    --secondary-foreground: 145 63% 25%;
+
+    --muted: 0 0% 96%;
+    --muted-foreground: 0 0% 45%;
+
+    --accent: 145 30% 95%;
+    --accent-foreground: 145 63% 25%;
+
+    --destructive: 0 84% 60%;
+    --destructive-foreground: 0 0% 100%;
+
+    /* Status colors */
+    --success: 145 63% 32%;
+    --success-foreground: 0 0% 100%;
+    
+    --warning: 38 92% 50%;
+    --warning-foreground: 0 0% 0%;
+
+    --border: 0 0% 90%;
+    --input: 0 0% 90%;
+    --ring: 145 63% 32%;
+
+    --radius: 0.5rem;
+
+    /* Sidebar - matching the green active state */
+    --sidebar-background: 0 0% 100%;
+    --sidebar-foreground: 0 0% 35%;
+    --sidebar-primary: 145 63% 32%;
+    --sidebar-primary-foreground: 0 0% 100%;
+    --sidebar-accent: 145 30% 95%;
+    --sidebar-accent-foreground: 145 63% 25%;
+    --sidebar-border: 0 0% 92%;
+    --sidebar-ring: 145 63% 32%;
+    
+    /* Custom tokens */
+    --online-bg: 145 63% 32%;
+    --online-toggle: 75 70% 50%;
+    --badge-takeaway: 24 100% 50%;
+    --badge-delivery: 0 0% 0%;
+  }
+
+  .dark {
+    --background: 0 0% 8%;
+    --foreground: 0 0% 95%;
+
+    --card: 0 0% 12%;
+    --card-foreground: 0 0% 95%;
+
+    --popover: 0 0% 12%;
+    --popover-foreground: 0 0% 95%;
+
+    --primary: 145 55% 45%;
+    --primary-foreground: 0 0% 100%;
+
+    --secondary: 145 20% 15%;
+    --secondary-foreground: 145 40% 80%;
+
+    --muted: 0 0% 15%;
+    --muted-foreground: 0 0% 60%;
+
+    --accent: 145 20% 15%;
+    --accent-foreground: 145 40% 80%;
+
+    --destructive: 0 62% 45%;
+    --destructive-foreground: 0 0% 100%;
+
+    --border: 0 0% 20%;
+    --input: 0 0% 20%;
+    --ring: 145 55% 45%;
+    
+    --sidebar-background: 0 0% 10%;
+    --sidebar-foreground: 0 0% 70%;
+    --sidebar-primary: 145 55% 45%;
+    --sidebar-primary-foreground: 0 0% 100%;
+    --sidebar-accent: 145 20% 18%;
+    --sidebar-accent-foreground: 145 40% 80%;
+    --sidebar-border: 0 0% 18%;
+    --sidebar-ring: 145 55% 45%;
+  }
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+
+  body {
+    @apply bg-background text-foreground antialiased;
+    font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+  }
+}
+
+@layer utilities {
+  .scrollbar-thin {
+    scrollbar-width: thin;
+  }
+  
+  .scrollbar-thin::-webkit-scrollbar {
+    width: 6px;
+  }
+  
+  .scrollbar-thin::-webkit-scrollbar-track {
+    background: transparent;
+  }
+  
+  .scrollbar-thin::-webkit-scrollbar-thumb {
+    background-color: hsl(var(--muted-foreground) / 0.3);
+    border-radius: 3px;
+  }
+}

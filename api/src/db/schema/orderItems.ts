@@ -21,7 +21,13 @@ export const orderItems = pgTable(
             .references(() => productVariants.id),
         // Product details (snapshot at time of order - important for historical data)
         productName: varchar("product_name", { length: 255 }).notNull(),
+        productBrand: varchar("product_brand", { length: 255 }).notNull(),
+        variantLabel: varchar("variant_label", { length: 100 }).notNull(), // e.g., "500g", "1L"
+        variantSku: varchar("variant_sku", { length: 100 }),
         productImage: varchar("product_image", { length: 500 }),
+        // Vendor details (snapshot at time of order)
+        vendorName: varchar("vendor_name", { length: 255 }),
+        vendorPhone: varchar("vendor_phone", { length: 20 }),
         // Quantity ordered
         quantity: integer("quantity").notNull(), // how many units customer ordered
         // Pricing (snapshot at time of order)

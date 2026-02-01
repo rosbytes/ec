@@ -7,6 +7,7 @@ export { userAddresses } from "./schema/userAddresses"
 export { vendors } from "./schema/vendors"
 export { vendorLocations } from "./schema/vendorLocations"
 export { categories } from "./schema/categories"
+export { categoryHierarchy } from "./schema/categoryHierarchy"
 export { products } from "./schema/products"
 export { productVariants } from "./schema/productVariants"
 export { productVariantImages } from "./schema/productVariantImages"
@@ -16,9 +17,6 @@ export { orders } from "./schema/orders"
 export { orderItems } from "./schema/orderItems"
 export { payments } from "./schema/payments"
 export { paymentRefunds } from "./schema/paymentRefunds"
-
-// temparary
-export { board } from "./schema/board"
 
 // functions
 export * from "./functions"

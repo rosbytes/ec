@@ -16,6 +16,9 @@ export const vendors = pgTable("vendors", {
     verified: boolean().default(false).notNull(),
     email: varchar({ length: 255 }),
 
+    // Global vendor flag for migration support
+    isGlobalVendor: boolean("is_global_vendor").notNull().default(false),
+
     // opens_at and closes_at should be the time or other data type
     opensAt: time("opens_at").notNull(),
     closesAt: time("closes_at").notNull(),
