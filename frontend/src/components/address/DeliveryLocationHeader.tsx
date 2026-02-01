@@ -1,5 +1,5 @@
 import React from 'react'
-import { ArrowBigDown, ChevronDown, MapPin } from 'lucide-react'
+import { ChevronDown, MapPin } from 'lucide-react'
 import AddressModal from './AddressModal'   
 
 interface DeliveryLocationHeaderProps {
