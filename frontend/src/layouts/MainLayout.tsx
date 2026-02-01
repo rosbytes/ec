@@ -13,12 +13,17 @@ import ProfileHomePage from '../pages/ProfileHomePage';
 import AddressPage from '../pages/AddressPage';
 import OrderHistoryPage from '../pages/OrderHistoryPage';
 import OrderDetailsPage from '../pages/OrderDetailsPage';
+<<<<<<< Updated upstream
+=======
+import OrderCard from '../components/order/OrderCard';
+>>>>>>> Stashed changes
 
  
 const MainLayout = () => {
   return (
     <div className='' >
       <OrderDetailsPage />
+<<<<<<< Updated upstream
       {/* <OrderHistoryPage /> */}
       {/* <AddressPage /> */}
       {/* <ProfileHomePage /> */}
@@ -26,11 +31,24 @@ const MainLayout = () => {
       {/* <WelcomePage /> */}
     {/* <AddLocationPage /> */}
       {/* <CartPage/>
+=======
+      <OrderHistoryPage />
+      <AddressPage />
+      <ProfileHomePage />
+      <AuthPage />
+      <WelcomePage />
+    <AddLocationPage />
+      <CartPage/>
+>>>>>>> Stashed changes
       <Header/>
       <SearchBar/>
       <AdBanner/>
       <ProductsListingPage/>
+<<<<<<< Updated upstream
       <BottomNav /> */}
+=======
+      <BottomNav />
+>>>>>>> Stashed changes
       
     </div>
   )
