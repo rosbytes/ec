@@ -1,14 +1,13 @@
-import React from 'react'
 import { ArrowLeft } from 'lucide-react';
 import location from './location.svg';
 import { MapPinPlus } from 'lucide-react';
 import Button from '../components/ui/Button';
+import PageHeader from '../components/navigation/PageHeader';
 const AddLocationPage = () => {
   return (
-    <div className='p-4 items-center justify-center flex flex-col  h-full '>
-      <div className='h-10 items-center flex  w-full '>
-        <ArrowLeft/>
-      </div>
+    <div>
+      <div className='px-4 fixed top-0'><PageHeader to={"/auth"} label={""} /></div>
+    <div className='p-4 justify-center flex flex-col  h-dvh'>
       <div className='items-center flex flex-col gap-5 justify-center mt-15'>
         <img src={location} alt="" className="aspect-square" />
         <h1 className='text-xl font-bold text-[#232323] '>Add Your Location</h1>
@@ -25,7 +24,10 @@ const AddLocationPage = () => {
         Let us check your location to see if our veggies can make it to your doorstep. Fingers crossed!
       </p>
       </div>
-      <div className='fixed bottom-0  bg-secondary w-full py-5'>
+      
+    </div>
+    
+      <div className='fixed bottom-0  bg-secondary w-full py-5 flex items-center'>
         <Button label={"Continue"} bgcolor={"secondary"} textColor={"accent-01"} />
       </div>
     </div>

@@ -1,13 +1,14 @@
-import React from "react";
-import { ArrowLeft, MapPin, ShoppingBag, MessageCircleMore, ChevronRight, Info, SquarePen } from 'lucide-react';
+import { MapPin, ShoppingBag, MessageCircleMore, ChevronRight, Info, SquarePen } from 'lucide-react';
 import aam from '../assets/profileAvatar/Aam.svg';
 import logoBlack from '../assets/logoBlack.svg'
 import PageHeader from "../components/navigation/PageHeader";
+import { useNavigate } from 'react-router-dom';
 
 const ProfileHomePage = () => {
+    const navigate = useNavigate();
     return(
-        <div className="px-4 flex flex-col ">
-            <PageHeader label={"Profile"} />
+        <div className="px-4 flex flex-col h-dvh">
+            <PageHeader to="/home" label={"Profile"} />
             <div className="bg-[#E1E8E2] h-22 rounded-lg flex gap-3 items-center px-4">
                 <div>
                     <img src={aam} alt="" />
@@ -18,12 +19,16 @@ const ProfileHomePage = () => {
                 </div>
             </div>
             <div className="h-20 my-4 rounded-lg flex gap-4">
-                <div className="bg-[#E1E8E2] h-full w-1/2 rounded-lg flex flex-col justify-center items-center ">
+                <div className="bg-[#E1E8E2] h-full w-1/2 rounded-lg flex flex-col justify-center items-center" onClick={()=>{
+                    navigate("/orders")
+                }}>
                     <ShoppingBag/>
                     <h1 className="text-text-1 font-semibold">Your Orders</h1>
 
                 </div>
-                <div className="bg-[#E1E8E2] h-full w-1/2 rounded-lg flex flex-col justify-center items-center">
+                <div className="bg-[#E1E8E2] h-full w-1/2 rounded-lg flex flex-col justify-center items-center" onClick={()=>{
+                    navigate("/address")
+                }} >
                     <MapPin />
                     <h1 className="text-text-1 font-semibold">Addresses</h1>
                 </div>
@@ -64,6 +69,7 @@ const ProfileHomePage = () => {
                 <p className="text-xs text-gray-500">v1.38.2003</p>
             </div>
         </div>
+        
         
     )
 }

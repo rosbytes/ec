@@ -1,11 +1,9 @@
 import React from 'react'
 
-const 
- = () => {
+const ProductImageCarousel = () => {
   return (
-    <div>
-    </div>
+    <div>ProductImageCarousel</div>
   )
 }
 
-export default 
+export default ProductImageCarousel

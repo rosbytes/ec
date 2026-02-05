@@ -1,5 +1,6 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { ArrowLeft, Edit2 } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
 
 // --- Types ---
 type Screen = 'PHONE' | 'OTP';
@@ -20,9 +21,9 @@ export default function AuthPage() {
   };
 
   return (
-    <div className="flex justify-center items-center min-h-screen bg-gray-900 font-sans">
+    <div className="flex justify-center items-center min-h-screen">
       {/* Mobile Frame Container */}
-      <div className="w-full max-w-sm h-[812px] bg-white relative shadow-2xl overflow-hidden flex flex-col">
+      <div className="w-full h-dvh overflow-hidden flex flex-col">
         
         {currentScreen === 'PHONE' ? (
           <PhoneNumberScreen onSubmit={handlePhoneSubmit} />
@@ -138,6 +139,8 @@ const OtpScreen = ({ phoneNumber, onBack }: { phoneNumber: string; onBack: () =>
     }, 2000);
   };
 
+  const navigate = useNavigate();
+
   return (
     <div className="flex flex-col h-full px-6 pt-6 pb-6 relative">
       
@@ -212,7 +215,11 @@ const OtpScreen = ({ phoneNumber, onBack }: { phoneNumber: string; onBack: () =>
       {/* Verify Button */}
       <div>
         <button
-          onClick={handleVerify}
+          onClick={()=>{
+            handleVerify();
+            navigate("/location-permission")
+
+          }}
           disabled={!isComplete || isVerifying}
           className={`w-full py-4 rounded-full font-bold text-sm transition-all duration-300 ${
             isComplete && !isVerifying

@@ -1,6 +1,7 @@
 import React from "react";
 import { ChevronDown, IndianRupee } from "lucide-react";
 import QuantitySelector from "./QuantitySelector";
+import { useNavigate } from "react-router-dom";
 
 interface ProductCardProps {
   image: string;
@@ -14,10 +15,15 @@ interface ProductCardProps {
 }
 
 export const ProductCard: React.FC<ProductCardProps> = (props) => {
+
+  const navigate = useNavigate();
+
   return (
     <div className="h-full w-25 flex flex-col">
       <div className="">
-        <img className="rounded-md aspect-square" src={props.image} alt="" />
+        <img className="rounded-md aspect-square" src={props.image} alt=""  onClick={()=>{
+      navigate("/products/abc")
+    }} />
       </div>
       <div className="ProductName mt-1.5 font-normal text-[0.8rem]">
         <p>

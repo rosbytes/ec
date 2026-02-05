@@ -1,11 +1,9 @@
 import React from 'react'
 
-const 
- = () => {
+const Modal = () => {
   return (
-    <div>
-    </div>
+    <div>Modal</div>
   )
 }
 
-export default 
+export default Modal

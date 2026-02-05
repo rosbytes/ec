@@ -1,13 +1,16 @@
-import React from 'react'
 import PageHeader from '../components/navigation/PageHeader'
-import { ChevronRight, CircleCheck, IndianRupee } from 'lucide-react'
 import OrderCard from '../components/order/OrderCard'
+import OrderDetailsPage from './OrderDetailsPage'
 
 const OrderHistoryPage = () => {
   return (
     <div className='px-4'>
-      <PageHeader label={"Your Orders"} />
+      <PageHeader to={"/profile"} label={"Your Orders"} />
+      <div className=' flex flex-col h gap-3'>
       <OrderCard />
+      <OrderCard />
+      <OrderCard />
+      </div>
     </div>
   )
 }

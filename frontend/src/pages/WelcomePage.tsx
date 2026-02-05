@@ -5,6 +5,7 @@ import tomato from '../assets/bg-images/tomato.svg'
 import potato from '../assets/bg-images/potato.svg'
 import carrot from '../assets/bg-images/carrot.svg'
 import cabbage from '../assets/bg-images/cabbage.svg'
+import { useNavigate } from 'react-router-dom';
 
 
 
@@ -32,8 +33,7 @@ const WelcomePage: React.FC<welcomePageProps> = (props) => {
     }
    },[])
     
-
-
+   const navigate = useNavigate();
 
   return (
     <div className="h-dvh w-full overflow-hidden relative bg-cover " style={{ backgroundImage: `url(${backgrounds[currentIndex]})` }}>
@@ -49,13 +49,15 @@ const WelcomePage: React.FC<welcomePageProps> = (props) => {
                 YOUR MARKET IS <br /> CLOSER THAN YOU <br />THINK.
             </h1>
         </div>
-        <div className='w-full mt-20 mb-3'>
+        <div className='flex flex-col fixed  bottom-0 py-10'>
+            <div className='w-full mt-20 mb-3' onClick={()=>navigate("/auth")}>
             <Button label={"Get Started"} bgcolor={"secondary border-none"} textColor={"black"} />
         </div>
         <div className='text-center px-8'>
             <h1 className='text-text-3 text-secondary'>
                 By tapping “Get Started”, you agree to our Privacy policy and Terms & conditions.
             </h1>
+        </div>
         </div>
 
     </div>

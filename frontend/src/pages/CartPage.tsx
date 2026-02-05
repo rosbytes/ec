@@ -5,18 +5,12 @@ import CartItem from "../components/cart/CartItem";
 import OfferCouponsAndPromo from "../components/cart/OfferCouponsAndPromo";
 import { ReceiptText } from "lucide-react";
 import Button from "../components/ui/Button";
+import PageHeader from "../components/navigation/PageHeader";
 const cartPage = () => {
   return (
     <div>
       <div className="px-4">
-      <div className="h-16 w-full flex justify-start gap-3 items-center">
-        <div>
-          <ArrowLeft />
-        </div>
-        <div className="text-lg font-bold text-[#444444]">
-          <h1>Cart</h1>
-        </div>
-      </div>
+      <PageHeader to="/home" label="Cart" />
       <div className="flex gap-2 font-bold">
         <Truck />
         <h1>Delivering Tomorrow by 10 AM</h1>

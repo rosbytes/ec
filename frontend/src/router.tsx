@@ -4,9 +4,7 @@ import type { RouteObject } from "react-router-dom";
 import MainLayout from "./layouts/MainLayout";
 
 // Pages
-import HomePage from "./pages/HomePage";
 import SearchPage from "./pages/SearchPage";
-import ProfileHomePage from "./pages/ProfileHomePage";
 import OrdersListingPage from "./pages/OrderHistoryPage";
 
 import ProductListingPage from "./pages/ProductListingPage";
@@ -23,8 +21,15 @@ import OrderDetailsPage from "./pages/OrderDetailsPage";
 import AuthPage from "./pages/AuthPage";
 import EditProfilePage from "./pages/EditProfilePage";
 import AddLocationPage from "./pages/AddLocationPage";
+import WelcomePage from "./pages/WelcomePage";
+import ProfileHomePage from "./pages/ProfileHomePage";
 
 export const appRoutes: RouteObject[] = [
+  
+  {
+    path:"/",
+    element: <WelcomePage />
+  },
  
   {
     path: "/location-permission",
@@ -36,14 +41,11 @@ export const appRoutes: RouteObject[] = [
   },
 
   {
-    path: "/",
+    path: "/home",
     element: <MainLayout />,
-    children: [
-      {
-        index: true,
-        element: <HomePage />,
-      },
-      {
+  },
+
+  {
         path: "search",
         element: <SearchPage />,
       },
@@ -59,8 +61,6 @@ export const appRoutes: RouteObject[] = [
         path: "orders",
         element: <OrdersListingPage />,
       },
-    ],
-  },
 
   {
     path: "/products",

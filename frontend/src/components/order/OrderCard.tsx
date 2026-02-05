@@ -1,7 +1,11 @@
 import React from 'react'
 import { ChevronRight, CircleCheck, IndianRupee } from 'lucide-react'
+import { useNavigate } from 'react-router-dom'
 
 const OrderCard = () => {
+  
+  const navigate = useNavigate();
+
   return (
     <div>
       <div className='h-31 w-full bg-[#EFE2DD] rounded-xl flex flex-col p-3 gap-2'>
@@ -11,7 +15,9 @@ const OrderCard = () => {
          <h1 className='font-semibold
          '>Arriving Tomorrow</h1>
          </div>
-         <button><ChevronRight /></button>
+         <ChevronRight onClick={()=>{
+          navigate("/orders/abc")
+         }} />
         </div>
        <div className='flex items-center justify-start gap-3 '>
          <div className='h-10 w-10'>

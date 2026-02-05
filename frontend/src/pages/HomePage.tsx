@@ -1,9 +1,17 @@
-import React from 'react'
+import DeliveryLocationHeader from '../components/address/DeliveryLocationHeader'
+import SearchBar from '../components/ui/SearchBar'
+import AdBanner from '../components/ui/AdBanner'
+import ProductListingPage from './ProductListingPage'
 
-const homePage = () => {
+const HomePage = () => {
   return (
-    <div>homePage</div>
+    <div>
+      <DeliveryLocationHeader />
+      <SearchBar />
+      <AdBanner />
+      <ProductListingPage />
+    </div>
   )
 }
 
-export default homePage
+export default HomePage

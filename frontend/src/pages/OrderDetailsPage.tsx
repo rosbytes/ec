@@ -1,12 +1,11 @@
-import React from "react";
 import PageHeader from "../components/navigation/PageHeader";
-import { Download, IndianRupee, ReceiptText, ShoppingBag, Truck, BadgePercent } from 'lucide-react';
+import { Download, IndianRupee, ReceiptText, ShoppingBag, Truck } from 'lucide-react';
 import OrderItemRow from "../components/order/OrderItemRow";
 
 const OrderDetailsPage = () => {
   return (
-    <div className="flex flex-col px-4 gap-2 bg-green-50">
-      <PageHeader label={"ORD13082003"} />
+    <div className="flex flex-col px-4 gap-2 bg-green-50 h-dvh">
+      <PageHeader to={"/orders"} label={"ORD13082003"} />
       <div className="h-12 w-full flex gap-2 items-center">
         <Truck className="bg-accent-01 h-10 w-10 p-2 text-white rounded-md " />
         <div className=" w-full">

@@ -1,16 +1,14 @@
 import { ArrowLeft, Delete, MapPin, MapPinned, MapPinPen, MapPinPlus, SquarePen, Trash2 } from 'lucide-react'
 import React from 'react'
 import Button from '../components/ui/Button'
+import PageHeader from '../components/navigation/PageHeader'
 
 const AddressPage = () => {
   return (
     <div className='px-4'>
-      <div className='h-16 flex'>
-        <div className='flex items-center gap-3 w-1/2'>
-          <ArrowLeft />
-        <h1 className='text-xl font-bold'>Addresses</h1>
-        </div>
-        <div className='w-1/2  flex justify-end items-center'>
+      <div className='h-16 flex justify-between'>
+        <PageHeader to="/profile" label={"Addresses"} />
+        <div className='w-1/4  flex justify-end items-center'>
           <button><MapPinPlus /></button>
         </div>
       </div>
