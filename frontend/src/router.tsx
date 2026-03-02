@@ -1,0 +1,99 @@
+import type { RouteObject } from "react-router-dom";
+
+// Layouts
+import MainLayout from "./layouts/MainLayout";
+
+// Pages
+import SearchPage from "./pages/SearchPage";
+import OrdersListingPage from "./pages/OrderHistoryPage";
+
+import ProductListingPage from "./pages/ProductListingPage";
+import ProductDetailPage from "./pages/ProductDetailPage";
+
+import CartPage from "./pages/CartPage";
+import AddressPage from "./pages/AddressPage";
+import PaymentPage from "./pages/PaymentPage";
+
+import OrderConfirmationPage from "./pages/OrderConfirmationPage";
+import OrderStatusPage from "./pages/OrderStatusPage";
+import OrderDetailsPage from "./pages/OrderDetailsPage";
+
+import AuthPage from "./pages/AuthPage";
+import EditProfilePage from "./pages/EditProfilePage";
+import AddLocationPage from "./pages/AddLocationPage";
+import WelcomePage from "./pages/WelcomePage";
+import ProfileHomePage from "./pages/ProfileHomePage";
+
+export const appRoutes: RouteObject[] = [
+  
+  {
+    path:"/",
+    element: <WelcomePage />
+  },
+ 
+  {
+    path: "/location-permission",
+    element: <AddLocationPage />,
+  },
+  {
+    path: "/auth",
+    element: <AuthPage />,
+  },
+
+  {
+    path: "/home",
+    element: <MainLayout />,
+  },
+
+  {
+        path: "search",
+        element: <SearchPage />,
+      },
+      {
+        path: "profile",
+        element: <ProfileHomePage />,
+      },
+      {
+        path: "profile/edit",
+        element: <EditProfilePage />,
+      },
+      {
+        path: "orders",
+        element: <OrdersListingPage />,
+      },
+
+  {
+    path: "/products",
+    element: <ProductListingPage />,
+  },
+  {
+    path: "/products/:productId",
+    element: <ProductDetailPage />,
+  },
+
+  {
+    path: "/cart",
+    element: <CartPage />,
+  },
+  {
+    path: "/address",
+    element: <AddressPage />,
+  },
+  {
+    path: "/payment",
+    element: <PaymentPage />,
+  },
+
+  {
+    path: "/order-confirmation",
+    element: <OrderConfirmationPage />,
+  },
+  {
+    path: "/order-status/:orderId",
+    element: <OrderStatusPage />,
+  },
+  {
+    path: "/orders/:orderId",
+    element: <OrderDetailsPage />,
+  },
+];

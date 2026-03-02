@@ -7,7 +7,8 @@
     "scripts": {
         "dev": "tsx watch src/server.ts",
         "build": "tsc -b --clean && tsc -b",
-        "start": "node dist/src/server.js"
+        "start": "node dist/src/server.js",
+        "dbpush": "drizzle-kit push"
     },
     "keywords": [],
     "author": "",
